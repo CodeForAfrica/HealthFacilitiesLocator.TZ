@@ -1,12 +1,13 @@
 var mainApp = angular.module("mainApp",['ui.bootstrap','ngDialog']);
 
-mainApp.controller('healthFacilitiesController',function($scope,$http,ngDialog){
+mainApp.controller('healthFacilitiesController',function($scope,$http,$location,ngDialog){
   $scope.facilities = [];
   $scope.query = "";
 
-  var url = 'http://localhost/C4T/health-tool/api/facilities?q=';
+  var url = $location.$$absUrl + 'api/facilities?q=';
 
   $scope.searchFacilities = function(){
+    console.log(url);
     $scope.query = "";
     $scope.facilities = [];
     $scope.query = document.getElementById('query').value;
