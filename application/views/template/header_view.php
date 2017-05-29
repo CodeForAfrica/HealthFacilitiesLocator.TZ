@@ -2,6 +2,7 @@
 <html ng-app="mainApp">
     <head>
         <title>Health Facilities Locator | Code For Tanzania</title>
+        <link rel="shortcut icon" href="<?= site_url('img/favicon.ico'); ?>">
         <link rel="stylesheet" type="text/css" href="<?= site_url('css/bootstrap.min.css')?>" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,800,700,600,300">
