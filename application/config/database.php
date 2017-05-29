@@ -73,12 +73,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
+$database_url = getenv("DATABASE_URL");
+$url=parse_url(getenv("DATABASE_URL"));
+$server = $url["host"];
+$username = isset($url["user"]) ? $url["user"] : '';
+$password = isset($url["pass"]) ? $url["pass"] : '';
+$database = substr($url["path"], 1);
+
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'database' => '',
+	'hostname' => $server === 'localhost' ? '127.0.0.1' : $server,
+	'username' => $username,
+	'password' => $password,
+	'database' => $database,
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
