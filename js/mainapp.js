@@ -25,4 +25,12 @@ mainApp.controller('healthFacilitiesController',function($scope,$http,ngDialog){
       scope: $scope
     });
   }
+
+  $scope.showEmbedCodes = function(){
+    ngDialog.open({
+      template: 'embed',
+      className: 'ngdialog-theme-default',
+      scope: $scope
+    });
+  }
 });

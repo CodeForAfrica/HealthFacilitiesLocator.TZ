@@ -19,6 +19,16 @@
     </div>
 </div>
 
+<script  type="text/ng-template" id="embed">
+    <div class="ngdialog-title">
+        <h4>Pachika kifaa hichi</h4>
+    </div>
+    <div class="ngdialog-message" style="padding:1em;padding-bottom:2em;">
+        <p>Nakili kanuni zilizopachikwa hapa chini na uziweke kwenye tovuti yako!</p>
+        <textarea class="form-control"><iframe src="<?= site_url('embed'); ?>" frameborder="0" scrolling="no" height="400px" width="100%"></iframe></textarea>
+    </div>
+</script>
+
 <script  type="text/ng-template" id="facilities">
     <div class="ngdialog-title">
         <h4>Matokeo ya vituo : {{query}}</h4>

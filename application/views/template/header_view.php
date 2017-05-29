@@ -29,7 +29,7 @@
                     <ul class="nav navbar-nav">
                         <li role="presentation" class=""><a href="https://twitter.com/code4africa" target="_blank">WASILIANA</a></li>
                         <li role="presentation" class="">
-                        <a class="embed-link" href="#" data-toggle="popover" title="Popover Header" data-content="Some content inside the popover">PACHIKA HII <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                        <a href="#" ng-click="showEmbedCodes()">PACHIKA HII <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                         </li>
                         <li role="presentation" class="navitem-divider"><a role="button" href="#"></a></li>
                         <li role="presentation" class="">
