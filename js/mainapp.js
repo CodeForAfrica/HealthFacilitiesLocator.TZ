@@ -4,10 +4,9 @@ mainApp.controller('healthFacilitiesController',function($scope,$http,$location,
   $scope.facilities = [];
   $scope.query = "";
 
-  var url = $location.$$absUrl + 'api/facilities?q=';
+  var url = $location.$$absUrl + 'http://htools-tz-healthfacilities-dev.dokku-2.healthtools.codeforafrica.org/api/facilities?q=';
 
   $scope.searchFacilities = function(){
-    console.log(url);
     $scope.query = "";
     $scope.facilities = [];
     $scope.query = document.getElementById('query').value;
