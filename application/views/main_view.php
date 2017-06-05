@@ -8,11 +8,11 @@
             <form class="health-form form-horizontal">
                 <div class="form-group">
                     <div class="col-sm-6 col-md-6 col-md-offset-3 col-sm-offset-0 col-xs-offset-0 ">
-                        <input placeholder="Jina la Sehemu" value="" id="query" class="form-control" type="text">
+                        <input placeholder="Jina la Sehemu" value="" id="query" ng-change="newFacility()" ng-model="query" class="form-control" type="text">
                     </div>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="show-result-btn col-sm-offset-5 col-xs-offset-3  btn btn-default" ng-click="searchFacilities()">TAFUTA</button>
+                    <button type="button" class="show-result-btn col-sm-offset-5 col-xs-offset-3  btn btn-default" ng-click="searchFacilities()" ng-disabled="disabled">TAFUTA</button>
                 </div>
             </form>
         </div>
@@ -34,6 +34,7 @@
         <h4>Matokeo ya vituo : {{query}}</h4>
     </div>
     <div class="ngdialog-message" style="height:450px; overflow-y:scroll;">
+        <div class="no-results" style="padding-left:20px;"><h5>{{no_results}}</h5></div>
         <div class="facilities" ng-repeat="facility in facilities">
             <div class="facility">
                 <strong>Jina : </strong><span>{{facility.facility_name}}</span><br />
