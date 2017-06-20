@@ -26,6 +26,11 @@ class Api extends CI_Controller {
     $ward = $this->input->get('ward');
     $village = $this->input->get('village');
 
+    $lat = $this->input->get('lat');
+    $lon = $this->input->get('lon');
+    //$rad = $this->input->get('rad');
+    $rad = 2;
+
     if( !isset($q) OR $q == NULL){
       $response = array(
         'status'=> 404,
@@ -60,6 +65,23 @@ class Api extends CI_Controller {
       }
 
       $result = $this->HFacilities->search($query, $all_levels);
+
+      if( $result == NULL ){
+        $response = array(
+          'status' => 404,
+          'message' => 'No results found'
+        );
+      }else{
+         $response = array(
+           'status' => 200,
+           'message' => 'Success',
+           'facilities' => $result
+         );
+      }
+    }
+
+    if(isset($lat) && isset($lon)){
+      $result = $this->HFacilities->getMarkers($lat,$lon,$rad);
 
       if( $result == NULL ){
         $response = array(

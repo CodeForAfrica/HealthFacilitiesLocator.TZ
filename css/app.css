@@ -53,8 +53,9 @@ input[type="color"]:focus,
 }
 
 .calculator-container{
-  min-height: 100vh;
-  margin-top: 150px;
+  min-height: auto;
+  margin-top: 200px;
+  margin-bottom: 150px;
 }
 
 .health-form{

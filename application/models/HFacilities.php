@@ -23,4 +23,26 @@ class HFacilities extends CI_Model {
     }
   }
 
+  public function getMarkers($lat,$lng,$rad){
+    /*
+    $this->db->select("*, ( 3959 * acos( cos( radians($lat) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians($lng) ) + sin( radians($lat) ) * sin( radians( lat ) ) ) ) AS distance");                         
+    $this->db->having('distance <= ' . $rad);                     
+    $this->db->order_by('distance');                    
+    $this->db->limit(20, 0);
+
+    $query = $this->db->get();
+    $result = $query->result();
+    return $result;
+    */
+
+    $this->db->select("*, ( 3959 * acos( cos( radians($lat) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians($lng) ) + sin( radians($lat) ) * sin( radians( lat ) ) ) ) AS distance");
+    $this->db->from('pro_health_facilities');
+    $this->db->having('distance <= ' . $rad);
+    $this->db->order_by('distance');
+    $this->db->limit(20, 0); 
+    $query = $this->db->get();
+    $result = $query->result();
+    return $result; 
+  }
+
 }

@@ -21,12 +21,12 @@
 
                     <form class="health-form form-horizontal">
                         <div class="form-group">
-                            <div class="col-sm-6 col-md-6 col-md-offset-3 col-sm-offset-0 col-xs-offset-0 ">
-                                <input placeholder="Jina la Sehemu" value="" id="query" class="form-control" type="text">
+                            <div class="<col-xs-12></col-xs-12>">
+                                <input placeholder="Jina la Sehemu" value="" id="query" ng-change="newFacility()" ng-model="query" class="form-control" type="text">
                             </div>
                         </div>
                         <div class="form-group">
-                            <button type="button" class="show-result-btn col-sm-offset-5 col-xs-offset-3  btn btn-default" ng-click="searchFacilities()">TAFUTA</button>
+                            <button type="button" class="show-result-btn col-sm-offset-5 col-xs-offset-3  btn btn-default" ng-click="searchFacilities()" ng-disabled="disabled">TAFUTA</button>
                         </div>
                     </form>
                 </div>
@@ -37,14 +37,16 @@
             <div class="ngdialog-title">
                 <h4>Matokeo ya vituo : {{query}}</h4>
             </div>
-            <div class="ngdialog-message" style="height:450px; overflow-y:scroll;">
+            <div class="ngdialog-message" style="height:500px; overflow-y:scroll;">
+                <div class="no-results" style="padding-left:20px;"><h5>{{no_results}}</h5></div>
                 <div class="facilities" ng-repeat="facility in facilities">
                     <div class="facility">
                         <strong>Jina : </strong><span>{{facility.facility_name}}</span><br />
                         <strong>Aina : </strong><span>{{facility.facility_type}}</span><br />
                         <strong>Hali : </strong><span>{{facility.status}}</span><br />
                         <strong>Umiliki : </strong><span>{{facility.ownership}}</span><br />
-                        <strong>Mahali : </strong><span>{{facility.ward}} {{facility.council}}, {{facility.district}}-{{facility.region}}</span>
+                        <strong>Mahali : </strong><span>{{facility.ward}} {{facility.council}}, {{facility.district}}-{{facility.region}}</span><br />
+                        <a target="_blank" href="https://www.google.co.tz/maps/search/{{facility.lat}},{{facility.lng}}">View on Map</a>
                     </div>
                 </div>
             </div>
@@ -53,9 +55,6 @@
     <script src="<?= site_url('js/angular.min.js'); ?>"></script>
     <script src="<?= site_url('js/ui-bootstrap-tpls-2.4.0.min.js'); ?>"></script>
     <script src="<?= site_url('js/ngDialog.js'); ?>"></script>
-    <script>
-      var server_url = "<?= $this->config->item('server_url') ?>";
-    </script>
     <script src="<?= site_url('js/mainapp.js'); ?>"></script>
     </body>
 </html>

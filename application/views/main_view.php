@@ -33,7 +33,7 @@
     <div class="ngdialog-title">
         <h4>Matokeo ya vituo : {{query}}</h4>
     </div>
-    <div class="ngdialog-message" style="height:450px; overflow-y:scroll;">
+    <div class="ngdialog-message" style="height:500px; overflow-y:scroll;">
         <div class="no-results" style="padding-left:20px;"><h5>{{no_results}}</h5></div>
         <div class="facilities" ng-repeat="facility in facilities">
             <div class="facility">
@@ -41,7 +41,8 @@
                 <strong>Aina : </strong><span>{{facility.facility_type}}</span><br />
                 <strong>Hali : </strong><span>{{facility.status}}</span><br />
                 <strong>Umiliki : </strong><span>{{facility.ownership}}</span><br />
-                <strong>Mahali : </strong><span>{{facility.ward}} {{facility.council}}, {{facility.district}}-{{facility.region}}</span>
+                <strong>Mahali : </strong><span>{{facility.ward}} {{facility.council}}, {{facility.district}}-{{facility.region}}</span><br />
+                <a target="_blank" href="https://www.google.co.tz/maps/search/{{facility.lat}},{{facility.lng}}">View on Map</a>
             </div>
         </div>
     </div>
