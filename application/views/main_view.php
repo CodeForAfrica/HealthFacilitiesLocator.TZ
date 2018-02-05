@@ -42,6 +42,8 @@
                 <strong>Hali : </strong><span>{{facility.status}}</span><br />
                 <strong>Umiliki : </strong><span>{{facility.ownership}}</span><br />
                 <strong>Mahali : </strong><span>{{facility.ward}} {{facility.council}}, {{facility.district}}-{{facility.region}}</span><br />
+                <div ng-if="facility.nhif_accreditation_no"><strong>NHIF : </strong><span>IPO</span><br /></div>
+                <div ng-if="!facility.nhif_accreditation_no"><strong>NHIF : </strong><span>HAIPO</span><br /></div>
                 <a target="_blank" href="https://www.google.co.tz/maps/search/{{facility.lat}},{{facility.lng}}">View on Map</a>
             </div>
         </div>
