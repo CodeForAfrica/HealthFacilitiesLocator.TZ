@@ -556,6 +556,7 @@ class CI_Xmlrpcs extends CI_Xmlrpc {
 	 */
 	public function multicall_error($err)
 	{
+		// PHP 8.2 deprecates ${var} string interpolation; use equivalent {$var} syntax.
 		$str = is_string($err) ? $this->xmlrpcstr["multicall_{$err}"] : $err->faultString();
 		$code = is_string($err) ? $this->xmlrpcerr["multicall_{$err}"] : $err->faultCode();
 
@@ -584,6 +585,7 @@ class CI_Xmlrpcs extends CI_Xmlrpc {
 			return $this->multicall_error('nomethod');
 		}
 
+		// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 		$scalar_type = key($methName->me);
 
 		$scalar_value = current($methName->me);
@@ -608,6 +610,7 @@ class CI_Xmlrpcs extends CI_Xmlrpc {
 			return $this->multicall_error('notarray');
 		}
 
+		// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 		$a = key($params->me);
 
 		$b = current($params->me);

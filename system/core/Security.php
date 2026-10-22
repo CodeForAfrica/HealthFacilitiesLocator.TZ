@@ -352,6 +352,7 @@ class CI_Security {
 		// Is the string an array?
 		if (is_array($str))
 		{
+			// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 			foreach (array_keys($str) as $key)
 			{
 				$str[$key] = $this->xss_clean($str[$key]);

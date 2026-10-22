@@ -453,6 +453,7 @@ class CI_Output {
 		if ($this->parse_exec_vars === TRUE)
 		{
 			$memory	= round(memory_get_usage() / 1024 / 1024, 2).'MB';
+			// PHP 8.1+: str_replace() deprecates a null subject; retain the previous null-to-empty-string conversion explicitly.
 			$output = str_replace(array('{elapsed_time}', '{memory_usage}'), array($elapsed, $memory), (string) $output);
 		}
 

@@ -460,6 +460,7 @@ class CI_Xmlrpc {
 			{
 				if (is_array($value[0]) && ($value[1] === 'struct' OR $value[1] === 'array'))
 				{
+					// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 					foreach (array_keys($value[0]) as $k)
 					{
 						$value[0][$k] = $this->values_parsing($value[0][$k]);
@@ -931,6 +932,7 @@ class XML_RPC_Response
 
 		if (is_array($array))
 		{
+			// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 			foreach (array_keys($array) as $key)
 			{
 				if (is_array($array[$key]))
@@ -993,6 +995,7 @@ class XML_RPC_Response
 			reset($xmlrpc_val->me['struct']);
 			$arr = array();
 
+			// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 			foreach ($xmlrpc_val->me['struct'] as $key => $value)
 			{
 				$arr[$key] = $this->xmlrpc_decoder($value);
@@ -1562,6 +1565,7 @@ class XML_RPC_Message extends CI_Xmlrpc
 
 		if ( ! empty($array))
 		{
+			// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 			foreach (array_keys($array) as $key)
 			{
 				if (is_array($array[$key]))
@@ -1632,6 +1636,7 @@ class XML_RPC_Message extends CI_Xmlrpc
 			reset($param->me['struct']);
 			$arr = array();
 
+			// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 			foreach ($param->me['struct'] as $key => $value)
 			{
 				$arr[$key] = $this->decode_message($value);
@@ -1823,6 +1828,7 @@ class XML_RPC_Values extends CI_Xmlrpc
 				// struct
 				$rs .= "<struct>\n";
 				reset($val);
+				// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 				foreach ($val as $key2 => $val2)
 				{
 					$rs .= "<member>\n<name>{$key2}</name>\n".$this->serializeval($val2)."</member>\n";
@@ -1887,6 +1893,7 @@ class XML_RPC_Values extends CI_Xmlrpc
 		$ar = $o->me;
 		reset($ar);
 
+		// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
 		$typ = key($ar);
 		$val = current($ar);
 		next($ar);

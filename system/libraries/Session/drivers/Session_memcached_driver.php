@@ -103,6 +103,7 @@ class CI_Session_memcached_driver extends CI_Session_driver implements SessionHa
 	 * @param	string	$name		Session cookie name, unused
 	 * @return	bool
 	 */
+	// PHP 8.1+: SessionHandlerInterface has tentative return types; suppress signature notices while preserving these legacy callback return values.
 	#[\ReturnTypeWillChange]
 	public function open($save_path, $name)
 	{
@@ -159,6 +160,7 @@ class CI_Session_memcached_driver extends CI_Session_driver implements SessionHa
 	 * @param	string	$session_id	Session ID
 	 * @return	string	Serialized session data
 	 */
+	// PHP 8.1+: SessionHandlerInterface has tentative return types; suppress signature notices while preserving these legacy callback return values.
 	#[\ReturnTypeWillChange]
 	public function read($session_id)
 	{
@@ -186,6 +188,7 @@ class CI_Session_memcached_driver extends CI_Session_driver implements SessionHa
 	 * @param	string	$session_data	Serialized session data
 	 * @return	bool
 	 */
+	// PHP 8.1+: SessionHandlerInterface has tentative return types; suppress signature notices while preserving these legacy callback return values.
 	#[\ReturnTypeWillChange]
 	public function write($session_id, $session_data)
 	{
@@ -241,6 +244,7 @@ class CI_Session_memcached_driver extends CI_Session_driver implements SessionHa
 	 *
 	 * @return	bool
 	 */
+	// PHP 8.1+: SessionHandlerInterface has tentative return types; suppress signature notices while preserving these legacy callback return values.
 	#[\ReturnTypeWillChange]
 	public function close()
 	{
@@ -269,6 +273,7 @@ class CI_Session_memcached_driver extends CI_Session_driver implements SessionHa
 	 * @param	string	$session_id	Session ID
 	 * @return	bool
 	 */
+	// PHP 8.1+: SessionHandlerInterface has tentative return types; suppress signature notices while preserving these legacy callback return values.
 	#[\ReturnTypeWillChange]
 	public function destroy($session_id)
 	{
@@ -292,6 +297,7 @@ class CI_Session_memcached_driver extends CI_Session_driver implements SessionHa
 	 * @param	int 	$maxlifetime	Maximum lifetime of sessions
 	 * @return	bool
 	 */
+	// PHP 8.1+: SessionHandlerInterface has tentative return types; suppress signature notices while preserving these legacy callback return values.
 	#[\ReturnTypeWillChange]
 	public function gc($maxlifetime)
 	{

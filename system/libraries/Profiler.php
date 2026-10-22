@@ -52,6 +52,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/general/profiling.html
  */
+// PHP 8.2+: profiler section flags use runtime-generated property names; allow their existing creation without deprecation notices.
 #[\AllowDynamicProperties]
 class CI_Profiler {
 
@@ -106,6 +107,7 @@ class CI_Profiler {
 		{
 			if ( ! isset($config[$section]))
 			{
+				// PHP 8 no longer supports this legacy curly-brace property syntax; construct the same property name explicitly.
 				$this->{'_compile_'.$section} = TRUE;
 			}
 		}
@@ -136,6 +138,7 @@ class CI_Profiler {
 		{
 			if (in_array($method, $this->_available_sections))
 			{
+				// PHP 8 no longer supports this legacy curly-brace property syntax; construct the same property name explicitly.
 				$this->{'_compile_'.$method} = ($enable !== FALSE);
 			}
 		}
@@ -543,6 +546,7 @@ class CI_Profiler {
 
 		foreach ($this->_available_sections as $section)
 		{
+			// PHP 8 no longer supports this legacy curly-brace property syntax; construct the same property name explicitly.
 			if ($this->{'_compile_'.$section} !== FALSE)
 			{
 				$func = '_compile_'.$section;

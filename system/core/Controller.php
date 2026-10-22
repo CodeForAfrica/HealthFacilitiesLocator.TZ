@@ -49,6 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/general/controllers.html
  */
+// PHP 8.2+: CI attaches runtime-named services here and in child controllers; allow those existing writes without deprecation notices.
 #[\AllowDynamicProperties]
 class CI_Controller {
 

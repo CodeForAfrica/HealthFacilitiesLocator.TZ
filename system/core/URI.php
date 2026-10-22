@@ -50,6 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class CI_URI {
 
+	// PHP 8.2+: declare the config service assigned by the constructor instead of creating a deprecated dynamic property.
 	public $config;
 
 	/**

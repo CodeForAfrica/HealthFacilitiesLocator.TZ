@@ -50,6 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class CI_Router {
 
+	// PHP 8.2+: declare the URI service assigned by the constructor instead of creating a deprecated dynamic property.
 	public $uri;
 
 	/**
