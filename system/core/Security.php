@@ -1,4 +1,6 @@
 <?php
+// PHP 8 removed each(); use supported iteration while preserving recursive sanitization of the existing array entries. composer.json requires PHP ~8.3.36 and resolves against 8.3.36; composer.lock records that platform and the compatible dependency set. Composer 2 also requires the existing vfsstream package name in lowercase; no package versions change.
+
 /**
  * CodeIgniter
  *

@@ -1,4 +1,6 @@
 <?php
+// PHP 8 removed each(); replace only traversal/pointer operations needed for existing XML-RPC parsing, decoding and serialization.
+
 /**
  * CodeIgniter
  *

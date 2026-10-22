@@ -1,4 +1,6 @@
 <?php
+// PHP 8 rejects the old curly-brace property syntax; construct the same profiler section names explicitly.
+
 /**
  * CodeIgniter
  *

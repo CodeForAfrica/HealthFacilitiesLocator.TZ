@@ -1,4 +1,6 @@
 <?php
+// PHP 8 removed each(); retain the current key/value and pointer advancement when reading XML-RPC multicall arguments.
+
 /**
  * CodeIgniter
  *

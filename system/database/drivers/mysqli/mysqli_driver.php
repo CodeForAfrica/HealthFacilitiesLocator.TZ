@@ -1,4 +1,6 @@
 <?php
+// PHP 8.1 changed MySQLi to throw by default; retain CodeIgniter's existing FALSE-return connection-failure handling.
+
 /**
  * CodeIgniter
  *
