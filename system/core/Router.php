@@ -50,19 +50,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class CI_Router {
 
+	public $uri;
+
 	/**
 	 * CI_Config class object
 	 *
 	 * @var	object
 	 */
 	public $config;
-
-	/**
-	 * CI_URI class object
-	 *
-	 * @var	object
-	 */
-	public $uri;
 
 	/**
 	 * List of routes
@@ -90,7 +85,7 @@ class CI_Router {
 	 *
 	 * @var	string
 	 */
-	public $directory = '';
+	public $directory;
 
 	/**
 	 * Default controller (and method if specific)
@@ -339,7 +334,7 @@ class CI_Router {
 	protected function _validate_request($segments)
 	{
 		$c = count($segments);
-		$directory_override = $this->directory !== '';
+		$directory_override = isset($this->directory);
 
 		// Loop through our segments and return as soon as a controller
 		// is found or when such a directory doesn't exist

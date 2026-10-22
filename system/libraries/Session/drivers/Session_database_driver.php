@@ -46,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author	Andrey Andreev
  * @link	https://codeigniter.com/user_guide/libraries/sessions.html
  */
-class CI_Session_database_driver extends CI_Session_driver implements CI_Session_driver_interface {
+class CI_Session_database_driver extends CI_Session_driver implements SessionHandlerInterface {
 
 	/**
 	 * DB object
@@ -126,14 +126,13 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	 * @param	string	$name		Session cookie name, unused
 	 * @return	bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function open($save_path, $name)
 	{
 		if (empty($this->_db->conn_id) && ! $this->_db->db_connect())
 		{
-			return $this->_failure;
+			return $this->_fail();
 		}
-
-		$this->php5_validate_id();
 
 		return $this->_success;
 	}
@@ -148,15 +147,13 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	 * @param	string	$session_id	Session ID
 	 * @return	string	Serialized session data
 	 */
+	#[\ReturnTypeWillChange]
 	public function read($session_id)
 	{
-		if ($this->_get_lock($session_id) === FALSE)
+		if ($this->_get_lock($session_id) !== FALSE)
 		{
-			return $this->_failure;
-		}
-
-		// Prevent previous QB calls from messing with our queries
-		$this->_db->reset_query();
+			// Prevent previous QB calls from messing with our queries
+			$this->_db->reset_query();
 
 			// Needed by write() to detect session_regenerate_id() calls
 			$this->_session_id = $session_id;
@@ -193,6 +190,10 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 			return $result;
 		}
 
+		$this->_fingerprint = md5('');
+		return '';
+	}
+
 	// ------------------------------------------------------------------------
 
 	/**
@@ -204,17 +205,18 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	 * @param	string	$session_data	Serialized session data
 	 * @return	bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function write($session_id, $session_data)
 	{
 		// Prevent previous QB calls from messing with our queries
 		$this->_db->reset_query();
 
 		// Was the ID regenerated?
-		if (isset($this->_session_id) && $session_id !== $this->_session_id)
+		if ($session_id !== $this->_session_id)
 		{
 			if ( ! $this->_release_lock() OR ! $this->_get_lock($session_id))
 			{
-				return $this->_failure;
+				return $this->_fail();
 			}
 
 			$this->_row_exists = FALSE;
@@ -222,7 +224,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 		}
 		elseif ($this->_lock === FALSE)
 		{
-			return $this->_failure;
+			return $this->_fail();
 		}
 
 		if ($this->_row_exists === FALSE)
@@ -241,7 +243,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 				return $this->_success;
 			}
 
-			return $this->_failure;
+			return $this->_fail();
 		}
 
 		$this->_db->where('id', $session_id);
@@ -264,7 +266,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 			return $this->_success;
 		}
 
-		return $this->_failure;
+		return $this->_fail();
 	}
 
 	// ------------------------------------------------------------------------
@@ -276,10 +278,11 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	 *
 	 * @return	bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function close()
 	{
 		return ($this->_lock && ! $this->_release_lock())
-			? $this->_failure
+			? $this->_fail()
 			: $this->_success;
 	}
 
@@ -293,6 +296,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	 * @param	string	$session_id	Session ID
 	 * @return	bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function destroy($session_id)
 	{
 		if ($this->_lock)
@@ -308,7 +312,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 
 			if ( ! $this->_db->delete($this->_config['save_path']))
 			{
-				return $this->_failure;
+				return $this->_fail();
 			}
 		}
 
@@ -318,7 +322,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 			return $this->_success;
 		}
 
-		return $this->_failure;
+		return $this->_fail();
 	}
 
 	// ------------------------------------------------------------------------
@@ -331,6 +335,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	 * @param	int 	$maxlifetime	Maximum lifetime of sessions
 	 * @return	bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function gc($maxlifetime)
 	{
 		// Prevent previous QB calls from messing with our queries
@@ -338,56 +343,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 
 		return ($this->_db->delete($this->_config['save_path'], 'timestamp < '.(time() - $maxlifetime)))
 			? $this->_success
-			: $this->_failure;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Update Timestamp
-	 *
-	 * Update session timestamp without modifying data
-	 *
-	 * @param	string	$id	Session ID
-	 * @param	string	$data	Unknown & unused
-	 * @return	bool
-	 */
-	public function updateTimestamp($id, $unknown)
-	{
-		// Prevent previous QB calls from messing with our queries
-		$this->_db->reset_query();
-
-		$this->_db->where('id', $id);
-		if ($this->_config['match_ip'])
-		{
-			$this->_db->where('ip_address', $_SERVER['REMOTE_ADDR']);
-		}
-
-		return (bool) $this->_db->update($this->_config['save_path'], array('timestamp' => time()));
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Validate ID
-	 *
-	 * Checks whether a session ID record exists server-side,
-	 * to enforce session.use_strict_mode.
-	 *
-	 * @param	string	$id	Session ID
-	 * @return	bool
-	 */
-	public function validateId($id)
-	{
-		// Prevent previous QB calls from messing with our queries
-		$this->_db->reset_query();
-
-		$this->_db->select('1')->from($this->_config['save_path'])->where('id', $id);
-		empty($this->_config['match_ip']) OR $this->_db->where('ip_address', $_SERVER['REMOTE_ADDR']);
-		$result = $this->_db->get();
-		empty($result) OR $result = $result->row();
-
-		return ! empty($result);
+			: $this->_fail();
 	}
 
 	// ------------------------------------------------------------------------
@@ -404,7 +360,7 @@ class CI_Session_database_driver extends CI_Session_driver implements CI_Session
 	{
 		if ($this->_platform === 'mysql')
 		{
-			$arg = md5($session_id.($this->_config['match_ip'] ? '_'.$_SERVER['REMOTE_ADDR'] : ''));
+			$arg = $session_id.($this->_config['match_ip'] ? '_'.$_SERVER['REMOTE_ADDR'] : '');
 			if ($this->_db->query("SELECT GET_LOCK('".$arg."', 300) AS ci_session_lock")->row()->ci_session_lock)
 			{
 				$this->_lock = $arg;

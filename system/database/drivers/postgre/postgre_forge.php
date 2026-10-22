@@ -86,7 +86,7 @@ class CI_DB_postgre_forge extends CI_DB_forge {
 
 		if (version_compare($this->db->version(), '9.0', '>'))
 		{
-			$this->_create_table_if = 'CREATE TABLE IF NOT EXISTS';
+			$this->create_table_if = 'CREATE TABLE IF NOT EXISTS';
 		}
 	}
 
@@ -125,13 +125,13 @@ class CI_DB_postgre_forge extends CI_DB_forge {
 			if ( ! empty($field[$i]['default']))
 			{
 				$sqls[] = $sql.' ALTER COLUMN '.$this->db->escape_identifiers($field[$i]['name'])
-					.' SET '.$field[$i]['default'];
+					.' SET DEFAULT '.$field[$i]['default'];
 			}
 
 			if (isset($field[$i]['null']))
 			{
 				$sqls[] = $sql.' ALTER COLUMN '.$this->db->escape_identifiers($field[$i]['name'])
-					.(trim($field[$i]['null']) === $this->_null ? ' DROP NOT NULL' : ' SET NOT NULL');
+					.($field[$i]['null'] === TRUE ? ' DROP NOT NULL' : ' SET NOT NULL');
 			}
 
 			if ( ! empty($field[$i]['new_name']))

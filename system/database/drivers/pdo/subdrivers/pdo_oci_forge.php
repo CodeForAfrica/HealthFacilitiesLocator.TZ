@@ -74,13 +74,6 @@ class CI_DB_pdo_oci_forge extends CI_DB_pdo_forge {
 	 */
 	protected $_unsigned		= FALSE;
 
-	/**
-	 * NULL value representation in CREATE/ALTER TABLE statements
-	 *
-	 * @var	string
-	 */
-	protected $_null		= 'NULL';
-
 	// --------------------------------------------------------------------
 
 	/**
@@ -124,7 +117,7 @@ class CI_DB_pdo_oci_forge extends CI_DB_pdo_forge {
 				if ($alter_type === 'MODIFY' && ! empty($field[$i]['new_name']))
 				{
 					$sqls[] = $sql.' RENAME COLUMN '.$this->db->escape_identifiers($field[$i]['name'])
-						.' TO '.$this->db->escape_identifiers($field[$i]['new_name']);
+						.' '.$this->db->escape_identifiers($field[$i]['new_name']);
 				}
 			}
 		}
@@ -150,29 +143,7 @@ class CI_DB_pdo_oci_forge extends CI_DB_pdo_forge {
 	 */
 	protected function _attr_auto_increment(&$attributes, &$field)
 	{
-		if ( ! empty($attributes['AUTO_INCREMENT']) && $attributes['AUTO_INCREMENT'] === TRUE && stripos($field['type'], 'number') !== FALSE && version_compare($this->db->version(), '12.1', '>='))
-		{
-			$field['auto_increment'] = ' GENERATED ALWAYS AS IDENTITY';
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Process column
-	 *
-	 * @param	array	$field
-	 * @return	string
-	 */
-	protected function _process_column($field)
-	{
-		return $this->db->escape_identifiers($field['name'])
-			.' '.$field['type'].$field['length']
-			.$field['unsigned']
-			.$field['default']
-			.$field['auto_increment']
-			.$field['null']
-			.$field['unique'];
+		// Not supported - sequences and triggers must be used instead
 	}
 
 	/**

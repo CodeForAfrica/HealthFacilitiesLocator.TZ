@@ -348,10 +348,7 @@ abstract class CI_DB_forge {
 
 		if (($result = $this->db->query($sql)) !== FALSE)
 		{
-			if (isset($this->db->data_cache['table_names']))
-			{
-				$this->db->data_cache['table_names'][] = $table;
-			}
+			empty($this->db->data_cache['table_names']) OR $this->db->data_cache['table_names'][] = $table;
 
 			// Most databases don't support creating indexes from within the CREATE TABLE statement
 			if ( ! empty($this->keys))
@@ -385,8 +382,10 @@ abstract class CI_DB_forge {
 			{
 				return TRUE;
 			}
-
-			$if_not_exists = FALSE;
+			else
+			{
+				$if_not_exists = FALSE;
+			}
 		}
 
 		$sql = ($if_not_exists)
@@ -727,7 +726,7 @@ abstract class CI_DB_forge {
 				'type'			=> isset($attributes['TYPE']) ? $attributes['TYPE'] : NULL,
 				'length'		=> '',
 				'unsigned'		=> '',
-				'null'			=> NULL,
+				'null'			=> '',
 				'unique'		=> '',
 				'default'		=> '',
 				'auto_increment'	=> '',
@@ -895,33 +894,21 @@ abstract class CI_DB_forge {
 			return;
 		}
 
-		if ( ! array_key_exists('DEFAULT', $attributes))
+		if (array_key_exists('DEFAULT', $attributes))
 		{
-			return;
-		}
-
-		if ($attributes['DEFAULT'] === NULL)
+			if ($attributes['DEFAULT'] === NULL)
 			{
 				$field['default'] = empty($this->_null) ? '' : $this->_default.$this->_null;
 
 				// Override the NULL attribute if that's our default
 				$attributes['NULL'] = TRUE;
 				$field['null'] = empty($this->_null) ? '' : ' '.$this->_null;
-			return;
+			}
+			else
+			{
+				$field['default'] = $this->_default.$this->db->escape($attributes['DEFAULT']);
+			}
 		}
-
-		// White-list CURRENT_TIMESTAMP & similar (e.g. Oracle has stuff like SYSTIMESTAMP) defaults for date/time fields
-		if (
-			isset($attributes['TYPE'])
-			&& (stripos($attributes['TYPE'],    'time') !== FALSE OR stripos($attributes['TYPE'],    'date') !== FALSE)
-			&& (stripos($attributes['DEFAULT'], 'time') !== FALSE OR stripos($attributes['DEFAULT'], 'date') !== FALSE)
-		)
-		{
-			$field['default'] = $this->_default.$attributes['DEFAULT'];
-			return;
-		}
-
-		$field['default'] = $this->_default.$this->db->escape($attributes['DEFAULT']);
 	}
 
 	// --------------------------------------------------------------------

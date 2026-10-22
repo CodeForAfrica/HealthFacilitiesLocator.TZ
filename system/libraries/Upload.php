@@ -678,8 +678,10 @@ class CI_Upload {
 			$this->set_error('upload_bad_filename', 'debug');
 			return FALSE;
 		}
-
-		return $new_filename;
+		else
+		{
+			return $new_filename;
+		}
 	}
 
 	// --------------------------------------------------------------------
@@ -867,7 +869,7 @@ class CI_Upload {
 			$this->file_type = 'image/jpeg';
 		}
 
-		$img_mimes = array('image/gif',	'image/jpeg', 'image/png', 'image/webp');
+		$img_mimes = array('image/gif',	'image/jpeg', 'image/png');
 
 		return in_array($this->file_type, $img_mimes, TRUE);
 	}
@@ -901,7 +903,7 @@ class CI_Upload {
 		}
 
 		// Images get some additional checks
-		if (in_array($ext, array('gif', 'jpg', 'jpeg', 'jpe', 'png', 'webp'), TRUE) && @getimagesize($this->file_temp) === FALSE)
+		if (in_array($ext, array('gif', 'jpg', 'jpeg', 'jpe', 'png'), TRUE) && @getimagesize($this->file_temp) === FALSE)
 		{
 			return FALSE;
 		}
@@ -1216,24 +1218,12 @@ class CI_Upload {
 		// We'll need this to validate the MIME info string (e.g. text/plain; charset=us-ascii)
 		$regexp = '/^([a-z\-]+\/[a-z0-9\-\.\+]+)(;\s.+)?$/';
 
-		/**
-		 * Fileinfo extension - most reliable method
-		 *
-		 * Apparently XAMPP, CentOS, cPanel and who knows what
-		 * other PHP distribution channels EXPLICITLY DISABLE
-		 * ext/fileinfo, which is otherwise enabled by default
-		 * since PHP 5.3 ...
-		 */
-		if (function_exists('finfo_file'))
-		{
-			$finfo = @finfo_open(FILEINFO_MIME);
-		if ($finfo !== FALSE) // It is possible that a FALSE value is returned, if there is no magic MIME database file found on the system
+		// Fileinfo extension - most reliable method
+		$finfo = @finfo_open(FILEINFO_MIME);
+		if (is_resource($finfo)) // It is possible that a FALSE value is returned, if there is no magic MIME database file found on the system
 		{
 			$mime = @finfo_file($finfo, $file['tmp_name']);
-				if (PHP_VERSION_ID < 80100)
-				{
-					finfo_close($finfo);
-				}
+			finfo_close($finfo);
 
 			/* According to the comments section of the PHP manual page,
 			 * it is possible that this function returns an empty string
@@ -1244,7 +1234,6 @@ class CI_Upload {
 				$this->file_type = $matches[1];
 				return;
 			}
-		}
 		}
 
 		/* This is an ugly hack, but UNIX-type systems provide a "native" way to detect the file type,
@@ -1260,7 +1249,9 @@ class CI_Upload {
 		 */
 		if (DIRECTORY_SEPARATOR !== '\\')
 		{
-			$cmd = 'file --brief --mime '.escapeshellarg($file['tmp_name']).' 2>&1';
+			$cmd = function_exists('escapeshellarg')
+				? 'file --brief --mime '.escapeshellarg($file['tmp_name']).' 2>&1'
+				: 'file --brief --mime '.$file['tmp_name'].' 2>&1';
 
 			if (function_usable('exec'))
 			{
@@ -1277,7 +1268,7 @@ class CI_Upload {
 				}
 			}
 
-			if (function_usable('shell_exec'))
+			if ( ! ini_get('safe_mode') && function_usable('shell_exec'))
 			{
 				$mime = @shell_exec($cmd);
 				if (strlen($mime) > 0)

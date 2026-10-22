@@ -192,7 +192,7 @@ if ( ! function_exists('img'))
 
 		foreach ($src as $k => $v)
 		{
-			if ($k === 'src' && ! preg_match('#^(data:[a-z,;])|(([a-z]+:)?(?<!data:)//)#i', $v))
+			if ($k === 'src' && ! preg_match('#^([a-z]+:)?//#i', $v))
 			{
 				if ($index_page === TRUE)
 				{
@@ -200,7 +200,7 @@ if ( ! function_exists('img'))
 				}
 				else
 				{
-					$img .= ' src="'.get_instance()->config->base_url($v).'"';
+					$img .= ' src="'.get_instance()->config->slash_item('base_url').$v.'"';
 				}
 			}
 			else
@@ -229,7 +229,7 @@ if ( ! function_exists('doctype'))
 	 * @param	string	type	The doctype to be generated
 	 * @return	string
 	 */
-	function doctype($type = 'html5')
+	function doctype($type = 'xhtml1-strict')
 	{
 		static $doctypes;
 
@@ -292,7 +292,7 @@ if ( ! function_exists('link_tag'))
 					}
 					else
 					{
-						$link .= 'href="'.$CI->config->base_url($v).'" ';
+						$link .= 'href="'.$CI->config->slash_item('base_url').$v.'" ';
 					}
 				}
 				else
@@ -313,7 +313,7 @@ if ( ! function_exists('link_tag'))
 			}
 			else
 			{
-				$link .= 'href="'.$CI->config->base_url($href).'" ';
+				$link .= 'href="'.$CI->config->slash_item('base_url').$href.'" ';
 			}
 
 			$link .= 'rel="'.$rel.'" type="'.$type.'" ';
@@ -360,30 +360,15 @@ if ( ! function_exists('meta'))
 			$name = array($name);
 		}
 
-		$allowed_types = array('charset', 'http-equiv', 'name', 'property');
 		$str = '';
 		foreach ($name as $meta)
 		{
-			// This is to preserve BC with pre-3.1 versions where only
-			// 'http-equiv' (default) and 'name' were supported.
-			if (isset($meta['type']))
-			{
-				if ($meta['type'] === 'equiv')
-				{
-					$meta['type'] = 'http-equiv';
-				}
-				elseif ( ! in_array($meta['type'], $allowed_types, TRUE))
-				{
-					$meta['type'] = 'name';
-				}
-			}
-
-			$type    = isset($meta['type'])	? $meta['type']    : 'name';
+			$type		= (isset($meta['type']) && $meta['type'] !== 'name')	? 'http-equiv' : 'name';
 			$name		= isset($meta['name'])					? $meta['name'] : '';
 			$content	= isset($meta['content'])				? $meta['content'] : '';
 			$newline	= isset($meta['newline'])				? $meta['newline'] : "\n";
 
-			$str .= '<meta '.$type.'="'.$name.($type === 'charset' ? '' : '" content="'.$content).'" />'.$newline;
+			$str .= '<meta '.$type.'="'.$name.'" content="'.$content.'" />'.$newline;
 		}
 
 		return $str;

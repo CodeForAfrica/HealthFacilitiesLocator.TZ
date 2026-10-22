@@ -52,6 +52,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/general/profiling.html
  */
+#[\AllowDynamicProperties]
 class CI_Profiler {
 
 	/**
@@ -71,76 +72,6 @@ class CI_Profiler {
 		'session_data',
 		'config'
 	);
-
-	/**
-	 * Compile benchmarks
-	 *
-	 * @var bool
-	 */
-	protected $_compile_benchmarks;
-
-	/**
-	 * Compile GET data
-	 *
-	 * @var bool
-	 */
-	protected $_compile_get;
-
-	/**
-	 * Compile memory usage
-	 *
-	 * @var bool
-	 */
-	protected $_compile_memory_usage;
-
-	/**
-	 * Compile POST data
-	 *
-	 * @var bool
-	 */
-	protected $_compile_post;
-
-	/**
-	 * Compile URI string
-	 *
-	 * @var bool
-	 */
-	protected $_compile_uri_string;
-
-	/**
-	 * Compile controller info
-	 *
-	 * @var bool
-	 */
-	protected $_compile_controller_info;
-
-	/**
-	 * Compile queries
-	 *
-	 * @var bool
-	 */
-	protected $_compile_queries;
-
-	/**
-	 * Compile HTTP headers
-	 *
-	 * @var bool
-	 */
-	protected $_compile_http_headers;
-
-	/**
-	 * Compile session data
-	 *
-	 * @var bool
-	 */
-	protected $_compile_session_data;
-
-	/**
-	 * Compile config data
-	 *
-	 * @var bool
-	 */
-	protected $_compile_config;
 
 	/**
 	 * Number of queries to show before making the additional queries togglable
@@ -386,7 +317,7 @@ class CI_Profiler {
 			{
 				is_int($key) OR $key = "'".htmlspecialchars($key, ENT_QUOTES, config_item('charset'))."'";
 				$val = (is_array($val) OR is_object($val))
-					? '<pre>'.htmlspecialchars(print_r($val, TRUE), ENT_QUOTES, config_item('charset')).'</pre>'
+					? '<pre>'.htmlspecialchars(print_r($val, TRUE), ENT_QUOTES, config_item('charset'))
 					: htmlspecialchars($val, ENT_QUOTES, config_item('charset'));
 
 				$output .= '<tr><td style="width:50%;color:#000;background-color:#ddd;padding:5px;">&#36;_GET['
@@ -426,7 +357,7 @@ class CI_Profiler {
 			{
 				is_int($key) OR $key = "'".htmlspecialchars($key, ENT_QUOTES, config_item('charset'))."'";
 				$val = (is_array($val) OR is_object($val))
-					? '<pre>'.htmlspecialchars(print_r($val, TRUE), ENT_QUOTES, config_item('charset')).'</pre>'
+					? '<pre>'.htmlspecialchars(print_r($val, TRUE), ENT_QUOTES, config_item('charset'))
 					: htmlspecialchars($val, ENT_QUOTES, config_item('charset'));
 
 				$output .= '<tr><td style="width:50%;padding:5px;color:#000;background-color:#ddd;">&#36;_POST['
@@ -438,7 +369,7 @@ class CI_Profiler {
 			{
 				is_int($key) OR $key = "'".htmlspecialchars($key, ENT_QUOTES, config_item('charset'))."'";
 				$val = (is_array($val) OR is_object($val))
-					? '<pre>'.htmlspecialchars(print_r($val, TRUE), ENT_QUOTES, config_item('charset')).'</pre>'
+					? '<pre>'.htmlspecialchars(print_r($val, TRUE), ENT_QUOTES, config_item('charset'))
 					: htmlspecialchars($val, ENT_QUOTES, config_item('charset'));
 
 				$output .= '<tr><td style="width:50%;padding:5px;color:#000;background-color:#ddd;">&#36;_FILES['
@@ -554,19 +485,13 @@ class CI_Profiler {
 
 		foreach ($this->CI->config->config as $config => $val)
 		{
-			$pre       = '';
-			$pre_close = '';
-
 			if (is_array($val) OR is_object($val))
 			{
 				$val = print_r($val, TRUE);
-
-				$pre       = '<pre>' ;
-				$pre_close = '</pre>';
 			}
 
 			$output .= '<tr><td style="padding:5px;vertical-align:top;color:#900;background-color:#ddd;">'
-				.$config.'&nbsp;&nbsp;</td><td style="padding:5px;color:#000;background-color:#ddd;">'.$pre.htmlspecialchars((string) $val, ENT_QUOTES, config_item('charset')).$pre_close."</td></tr>\n";
+				.$config.'&nbsp;&nbsp;</td><td style="padding:5px;color:#000;background-color:#ddd;">'.htmlspecialchars($val)."</td></tr>\n";
 		}
 
 		return $output."</table>\n</fieldset>";
@@ -592,19 +517,13 @@ class CI_Profiler {
 
 		foreach ($this->CI->session->userdata() as $key => $val)
 		{
-			$pre       = '';
-			$pre_close = '';
-
 			if (is_array($val) OR is_object($val))
 			{
 				$val = print_r($val, TRUE);
-
-				$pre       = '<pre>' ;
-				$pre_close = '</pre>';
 			}
 
 			$output .= '<tr><td style="padding:5px;vertical-align:top;color:#900;background-color:#ddd;">'
-				.$key.'&nbsp;&nbsp;</td><td style="padding:5px;color:#000;background-color:#ddd;">'.$pre.htmlspecialchars((string) $val, ENT_QUOTES, config_item('charset')).$pre_close."</td></tr>\n";
+				.$key.'&nbsp;&nbsp;</td><td style="padding:5px;color:#000;background-color:#ddd;">'.htmlspecialchars($val)."</td></tr>\n";
 		}
 
 		return $output."</table>\n</fieldset>";

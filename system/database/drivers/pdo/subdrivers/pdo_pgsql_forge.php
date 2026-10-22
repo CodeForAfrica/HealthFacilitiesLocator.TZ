@@ -54,13 +54,6 @@ class CI_DB_pdo_pgsql_forge extends CI_DB_pdo_forge {
 	protected $_drop_table_if	= 'DROP TABLE IF EXISTS';
 
 	/**
-	 * CREATE TABLE IF statement
-	 *
-	 * @var	string
-	 */
-	protected $_create_table_if	= 'CREATE TABLE IF NOT EXISTS';
-
-	/**
 	 * UNSIGNED support
 	 *
 	 * @var	array
@@ -98,7 +91,7 @@ class CI_DB_pdo_pgsql_forge extends CI_DB_pdo_forge {
 
 		if (version_compare($this->db->version(), '9.0', '>'))
 		{
-			$this->_create_table_if = 'CREATE TABLE IF NOT EXISTS';
+			$this->create_table_if = 'CREATE TABLE IF NOT EXISTS';
 		}
 	}
 
@@ -137,13 +130,13 @@ class CI_DB_pdo_pgsql_forge extends CI_DB_pdo_forge {
 			if ( ! empty($field[$i]['default']))
 			{
 				$sqls[] = $sql.' ALTER COLUMN '.$this->db->escape_identifiers($field[$i]['name'])
-					.' SET '.$field[$i]['default'];
+					.' SET DEFAULT '.$field[$i]['default'];
 			}
 
 			if (isset($field[$i]['null']))
 			{
 				$sqls[] = $sql.' ALTER COLUMN '.$this->db->escape_identifiers($field[$i]['name'])
-					.(trim($field[$i]['null']) === $this->_null ? ' DROP NOT NULL' : ' SET NOT NULL');
+					.($field[$i]['null'] === TRUE ? ' DROP NOT NULL' : ' SET NOT NULL');
 			}
 
 			if ( ! empty($field[$i]['new_name']))

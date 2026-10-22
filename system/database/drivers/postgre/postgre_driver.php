@@ -85,8 +85,15 @@ class CI_DB_postgre_driver extends CI_DB {
 	 * @param	array	$params
 	 * @return	void
 	 */
-	protected function _build_dsn()
+	public function __construct($params)
 	{
+		parent::__construct($params);
+
+		if ( ! empty($this->dsn))
+		{
+			return;
+		}
+
 		$this->dsn === '' OR $this->dsn = '';
 
 		if (strpos($this->hostname, '/') !== FALSE)
@@ -97,7 +104,7 @@ class CI_DB_postgre_driver extends CI_DB {
 
 		$this->hostname === '' OR $this->dsn = 'host='.$this->hostname.' ';
 
-		if ( ! empty($this->port) && ctype_digit((string) $this->port))
+		if ( ! empty($this->port) && ctype_digit($this->port))
 		{
 			$this->dsn .= 'port='.$this->port.' ';
 		}
@@ -123,9 +130,9 @@ class CI_DB_postgre_driver extends CI_DB {
 		 */
 		foreach (array('connect_timeout', 'options', 'sslmode', 'service') as $key)
 		{
-			if (isset($this->$key) && is_string($this->$key) && $this->$key !== '')
+			if (isset($this->$key) && is_string($this->key) && $this->key !== '')
 			{
-				$this->dsn .= $key."='".$this->$key."' ";
+				$this->dsn .= $key."='".$this->key."' ";
 			}
 		}
 
@@ -142,7 +149,6 @@ class CI_DB_postgre_driver extends CI_DB {
 	 */
 	public function db_connect($persistent = FALSE)
 	{
-		empty($this->dsn) && $this->_build_dsn();
 		$this->conn_id = ($persistent === TRUE)
 			? pg_pconnect($this->dsn)
 			: pg_connect($this->dsn);
@@ -155,13 +161,6 @@ class CI_DB_postgre_driver extends CI_DB {
 			)
 			{
 				return FALSE;
-			}
-
-			if (pg_set_client_encoding($this->conn_id, $this->char_set) !== 0)
-			{
-				log_message('error', "Database: Unable to set the configured connection charset ('{$this->char_set}').");
-				pg_close($this->conn_id);
-				return ($this->db->db_debug) ? $this->display_error('db_unable_to_set_charset', $this->char_set) : FALSE;
 			}
 
 			empty($this->schema) OR $this->simple_query('SET search_path TO '.$this->schema.',public');
@@ -191,6 +190,19 @@ class CI_DB_postgre_driver extends CI_DB {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Set client character set
+	 *
+	 * @param	string	$charset
+	 * @return	bool
+	 */
+	protected function _db_set_charset($charset)
+	{
+		return (pg_set_client_encoding($this->conn_id, $charset) === 0);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Database version number
 	 *
 	 * @return	string
@@ -212,8 +224,8 @@ class CI_DB_postgre_driver extends CI_DB {
 		 * and so we'll have to fall back to running a query in
 		 * order to get it.
 		 */
-		return (isset($pg_version['server']) && preg_match('#^(\d+\.\d+)#', $pg_version['server'], $match))
-			? $this->data_cache['version'] = $match[1]
+		return isset($pg_version['server'])
+			? $this->data_cache['version'] = $pg_version['server']
 			: parent::version();
 	}
 
@@ -309,7 +321,7 @@ class CI_DB_postgre_driver extends CI_DB {
 	 */
 	public function escape($str)
 	{
-		if (is_string($str) OR (is_object($str) && method_exists($str, '__toString')))
+		if (is_php('5.4.4') && (is_string($str) OR (is_object($str) && method_exists($str, '__toString'))))
 		{
 			return pg_escape_literal($this->conn_id, $str);
 		}
@@ -342,7 +354,8 @@ class CI_DB_postgre_driver extends CI_DB {
 	 */
 	public function insert_id()
 	{
-		$v = $this->version(); // 'server' key is only available since PosgreSQL 7.4
+		$v = pg_version($this->conn_id);
+		$v = isset($v['server']) ? $v['server'] : 0; // 'server' key is only available since PosgreSQL 7.4
 
 		$table	= (func_num_args() > 0) ? func_get_arg(0) : NULL;
 		$column	= (func_num_args() > 1) ? func_get_arg(1) : NULL;
@@ -416,7 +429,7 @@ class CI_DB_postgre_driver extends CI_DB {
 	{
 		return 'SELECT "column_name"
 			FROM "information_schema"."columns"
-			WHERE "table_schema" = \''.$this->schema.'\' AND LOWER("table_name") = '.$this->escape(strtolower($table));
+			WHERE LOWER("table_name") = '.$this->escape(strtolower($table));
 	}
 
 	// --------------------------------------------------------------------
@@ -431,7 +444,7 @@ class CI_DB_postgre_driver extends CI_DB {
 	{
 		$sql = 'SELECT "column_name", "data_type", "character_maximum_length", "numeric_precision", "column_default"
 			FROM "information_schema"."columns"
-			WHERE "table_schema" = \''.$this->schema.'\' AND LOWER("table_name") = '.$this->escape(strtolower($table));
+			WHERE LOWER("table_name") = '.$this->escape(strtolower($table));
 
 		if (($query = $this->query($sql)) === FALSE)
 		{
@@ -537,13 +550,13 @@ class CI_DB_postgre_driver extends CI_DB {
 		$ids = array();
 		foreach ($values as $key => $val)
 		{
-			$ids[] = $val[$index]['value'];
+			$ids[] = $val[$index];
 
 			foreach (array_keys($val) as $field)
 			{
 				if ($field !== $index)
 				{
-					$final[$val[$field]['field']][] = 'WHEN '.$val[$index]['value'].' THEN '.$val[$field]['value'];
+					$final[$field][] = 'WHEN '.$val[$index].' THEN '.$val[$field];
 				}
 			}
 		}
@@ -551,12 +564,12 @@ class CI_DB_postgre_driver extends CI_DB {
 		$cases = '';
 		foreach ($final as $k => $v)
 		{
-			$cases .= $k.' = (CASE '.$val[$index]['field']."\n"
+			$cases .= $k.' = (CASE '.$index."\n"
 				.implode("\n", $v)."\n"
 				.'ELSE '.$k.' END), ';
 		}
 
-		$this->where($val[$index]['field'].' IN('.implode(',', $ids).')', NULL, FALSE);
+		$this->where($index.' IN('.implode(',', $ids).')', NULL, FALSE);
 
 		return 'UPDATE '.$table.' SET '.substr($cases, 0, -2).$this->_compile_wh('qb_where');
 	}

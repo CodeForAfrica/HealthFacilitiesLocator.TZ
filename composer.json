@@ -16,10 +16,13 @@
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
 	},
+	"require-dev": {
+		"heroku/heroku-buildpack-php": "*",
+		"mikey179/vfsstream": "1.1.*"
+	},
 	"config": {
 		"platform": {
 			"php": "8.3.36"
-		},
-		"allow-plugins": false
+		}
 	}
 }

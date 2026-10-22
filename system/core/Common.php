@@ -91,7 +91,7 @@ if ( ! function_exists('is_really_writable'))
 	function is_really_writable($file)
 	{
 		// If we're on a Unix server with safe_mode off we call is_writable
-		if (DIRECTORY_SEPARATOR === '/')
+		if (DIRECTORY_SEPARATOR === '/' && (is_php('5.4') OR ! ini_get('safe_mode')))
 		{
 			return is_writable($file);
 		}
@@ -319,13 +319,17 @@ if ( ! function_exists('get_mimes'))
 
 		if (empty($_mimes))
 		{
-			$_mimes = file_exists(APPPATH.'config/mimes.php')
-				? include(APPPATH.'config/mimes.php')
-				: array();
-
 			if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/mimes.php'))
 			{
-				$_mimes = array_merge($_mimes, include(APPPATH.'config/'.ENVIRONMENT.'/mimes.php'));
+				$_mimes = include(APPPATH.'config/'.ENVIRONMENT.'/mimes.php');
+			}
+			elseif (file_exists(APPPATH.'config/mimes.php'))
+			{
+				$_mimes = include(APPPATH.'config/mimes.php');
+			}
+			else
+			{
+				$_mimes = array();
 			}
 		}
 
@@ -406,6 +410,11 @@ if ( ! function_exists('show_error'))
 		if ($status_code < 100)
 		{
 			$exit_status = $status_code + 9; // 9 is EXIT__AUTO_MIN
+			if ($exit_status > 125) // 125 is EXIT__AUTO_MAX
+			{
+				$exit_status = 1; // EXIT_ERROR
+			}
+
 			$status_code = 500;
 		}
 		else
@@ -499,7 +508,6 @@ if ( ! function_exists('set_status_header'))
 			$stati = array(
 				100	=> 'Continue',
 				101	=> 'Switching Protocols',
-				103	=> 'Early Hints',
 
 				200	=> 'OK',
 				201	=> 'Created',
@@ -508,7 +516,6 @@ if ( ! function_exists('set_status_header'))
 				204	=> 'No Content',
 				205	=> 'Reset Content',
 				206	=> 'Partial Content',
-				207	=> 'Multi-Status',
 
 				300	=> 'Multiple Choices',
 				301	=> 'Moved Permanently',
@@ -517,7 +524,6 @@ if ( ! function_exists('set_status_header'))
 				304	=> 'Not Modified',
 				305	=> 'Use Proxy',
 				307	=> 'Temporary Redirect',
-				308	=> 'Permanent Redirect',
 
 				400	=> 'Bad Request',
 				401	=> 'Unauthorized',
@@ -537,13 +543,11 @@ if ( ! function_exists('set_status_header'))
 				415	=> 'Unsupported Media Type',
 				416	=> 'Requested Range Not Satisfiable',
 				417	=> 'Expectation Failed',
-				421	=> 'Misdirected Request',
 				422	=> 'Unprocessable Entity',
 				426	=> 'Upgrade Required',
 				428	=> 'Precondition Required',
 				429	=> 'Too Many Requests',
 				431	=> 'Request Header Fields Too Large',
-				451	=> 'Unavailable For Legal Reasons',
 
 				500	=> 'Internal Server Error',
 				501	=> 'Not Implemented',
@@ -567,11 +571,12 @@ if ( ! function_exists('set_status_header'))
 		if (strpos(PHP_SAPI, 'cgi') === 0)
 		{
 			header('Status: '.$code.' '.$text, TRUE);
-			return;
 		}
-
-		$server_protocol = (isset($_SERVER['SERVER_PROTOCOL']) && in_array($_SERVER['SERVER_PROTOCOL'], array('HTTP/1.0', 'HTTP/1.1', 'HTTP/2', 'HTTP/2.0'), TRUE)) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+		else
+		{
+			$server_protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
 			header($server_protocol.' '.$code.' '.$text, TRUE, $code);
+		}
 	}
 }
 
@@ -719,14 +724,13 @@ if ( ! function_exists('remove_invisible_characters'))
 		{
 			$non_displayables[] = '/%0[0-8bcef]/i';	// url encoded 00-08, 11, 12, 14, 15
 			$non_displayables[] = '/%1[0-9a-f]/i';	// url encoded 16-31
-			$non_displayables[] = '/%7f/i';	// url encoded 127
 		}
 
 		$non_displayables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';	// 00-08, 11, 12, 14-31, 127
 
 		do
 		{
-			$str = preg_replace($non_displayables, '', (string)$str, -1, $count);
+			$str = preg_replace($non_displayables, '', $str, -1, $count);
 		}
 		while ($count);
 
@@ -782,9 +786,11 @@ if ( ! function_exists('_stringify_attributes'))
 	 */
 	function _stringify_attributes($attributes, $js = FALSE)
 	{
+		$atts = NULL;
+
 		if (empty($attributes))
 		{
-			return NULL;
+			return $atts;
 		}
 
 		if (is_string($attributes))
@@ -793,8 +799,6 @@ if ( ! function_exists('_stringify_attributes'))
 		}
 
 		$attributes = (array) $attributes;
-
-		$atts = '';
 
 		foreach ($attributes as $key => $val)
 		{

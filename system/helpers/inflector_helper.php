@@ -63,7 +63,7 @@ if ( ! function_exists('singular'))
 	{
 		$result = strval($str);
 
-		if ( ! word_is_countable($result))
+		if ( ! is_countable($result))
 		{
 			return $result;
 		}
@@ -95,7 +95,6 @@ if ( ! function_exists('singular'))
 			'/(s)tatuses$/'		=> '\1\2tatus',
 			'/(c)hildren$/'		=> '\1\2hild',
 			'/(n)ews$/'		=> '\1\2ews',
-			'/(quiz)zes$/'		=> '\1',
 			'/([^us])s$/'		=> '\1'
 		);
 
@@ -128,7 +127,7 @@ if ( ! function_exists('plural'))
 	{
 		$result = strval($str);
 
-		if ( ! word_is_countable($result))
+		if ( ! is_countable($result))
 		{
 			return $result;
 		}
@@ -226,7 +225,7 @@ if ( ! function_exists('humanize'))
 
 // --------------------------------------------------------------------
 
-if ( ! function_exists('word_is_countable'))
+if ( ! function_exists('is_countable'))
 {
 	/**
 	 * Checks if the given word has a plural version.
@@ -234,7 +233,7 @@ if ( ! function_exists('word_is_countable'))
 	 * @param	string	$word	Word to check
 	 * @return	bool
 	 */
-	function word_is_countable($word)
+	function is_countable($word)
 	{
 		return ! in_array(
 			strtolower($word),
@@ -272,55 +271,5 @@ if ( ! function_exists('word_is_countable'))
 				'wheat'
 			)
 		);
-	}
-}
-
-// --------------------------------------------------------------------
-
-if ( ! function_exists('is_countable'))
-{
-	function is_countable($word)
-	{
-		trigger_error('is_countable() is a native PHP function since version 7.3.0; use word_is_countable() instead', E_USER_WARNING);
-		return word_is_countable($word);
-	}
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists('ordinal_format'))
-{
-	/**
-	 * Returns the English ordinal numeral for a given number
-	 *
-	 * @param  int    $number
-	 * @return string
-	 */
-	function ordinal_format($number)
-	{
-		if ( ! ctype_digit((string) $number) OR $number < 1)
-		{
-			return $number;
-		}
-
-		$last_digit = array(
-			0 => 'th',
-			1 => 'st',
-			2 => 'nd',
-			3 => 'rd',
-			4 => 'th',
-			5 => 'th',
-			6 => 'th',
-			7 => 'th',
-			8 => 'th',
-			9 => 'th'
-		);
-
-		if (($number % 100) >= 11 && ($number % 100) <= 13)
-		{
-			return $number.'th';
-		}
-
-		return $number.$last_digit[$number % 10];
 	}
 }

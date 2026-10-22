@@ -48,7 +48,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/libraries/loader.html
  */
-#[AllowDynamicProperties]
+#[\AllowDynamicProperties]
 class CI_Loader {
 
 	// All these are set automatically. Don't mess with them.
@@ -93,13 +93,6 @@ class CI_Loader {
 	 * @var	array
 	 */
 	protected $_ci_cached_vars =	array();
-
-	/**
-	 * Stack of variable arrays to provide nested _ci_load calls with all variables from parent calls
-	 *
-	 * @var	array
-	 */
-	protected $_ci_load_vars_stack =	array();
 
 	/**
 	 * List of loaded classes
@@ -311,8 +304,6 @@ class CI_Loader {
 				{
 					throw new RuntimeException($app_path."Model.php exists, but doesn't declare class CI_Model");
 				}
-
-				log_message('info', 'CI_Model class loaded');
 			}
 			elseif ( ! class_exists('CI_Model', FALSE))
 			{
@@ -327,8 +318,6 @@ class CI_Loader {
 				{
 					throw new RuntimeException($app_path.$class.".php exists, but doesn't declare class ".$class);
 				}
-
-				log_message('info', config_item('subclass_prefix').'Model class loaded');
 			}
 		}
 
@@ -356,16 +345,13 @@ class CI_Loader {
 				throw new RuntimeException('Unable to locate the model you have specified: '.$model);
 			}
 		}
-
-		if ( ! is_subclass_of($model, 'CI_Model'))
+		elseif ( ! is_subclass_of($model, 'CI_Model'))
 		{
-			throw new RuntimeException("Class ".$model." doesn't extend CI_Model");
+			throw new RuntimeException("Class ".$model." already exists and doesn't extend CI_Model");
 		}
 
 		$this->_ci_models[] = $name;
-		$model = new $model();
-		$CI->$name = $model;
-		log_message('info', 'Model "'.get_class($model).'" initialized');
+		$CI->$name = new $model();
 		return $this;
 	}
 
@@ -382,13 +368,13 @@ class CI_Loader {
 	 * @return	object|bool	Database object if $return is set to TRUE,
 	 *					FALSE on failure, CI_Loader instance in any other case
 	 */
-	public function database($params = '', $return = FALSE)
+	public function database($params = '', $return = FALSE, $query_builder = NULL)
 	{
 		// Grab the super object
 		$CI =& get_instance();
 
 		// Do we even need to load the database class?
-		if ($return === FALSE && isset($CI->db) && is_object($CI->db) && ! empty($CI->db->conn_id))
+		if ($return === FALSE && $query_builder === NULL && isset($CI->db) && is_object($CI->db) && ! empty($CI->db->conn_id))
 		{
 			return FALSE;
 		}
@@ -397,7 +383,7 @@ class CI_Loader {
 
 		if ($return === TRUE)
 		{
-			return DB($params);
+			return DB($params, $query_builder);
 		}
 
 		// Initialize the db variable. Needed to prevent
@@ -405,7 +391,7 @@ class CI_Loader {
 		$CI->db = '';
 
 		// Load the DB class
-		$CI->db =& DB($params);
+		$CI->db =& DB($params, $query_builder);
 		return $this;
 	}
 
@@ -501,20 +487,7 @@ class CI_Loader {
 	 */
 	public function view($view, $vars = array(), $return = FALSE)
 	{
-		$measure = "View - $view";
-		$CI =& get_instance();
-
-		if (property_exists($CI, "debugbar") && $CI->debugbar) {
-			$CI->debugbar["time"]->startMeasure($measure);
-		}
-
-		$result = $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_prepare_view_vars($vars), '_ci_return' => $return));
-
-		if (property_exists($CI, "debugbar") && $CI->debugbar && $CI->debugbar["time"]->hasStartedMeasure($measure)) {
-			$CI->debugbar["time"]->stopMeasure($measure);
-		}
-
-		return $result;
+		return $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_object_to_array($vars), '_ci_return' => $return));
 	}
 
 	// --------------------------------------------------------------------
@@ -547,13 +520,19 @@ class CI_Loader {
 	 */
 	public function vars($vars, $val = '')
 	{
-		$vars = is_string($vars)
-			? array($vars => $val)
-			: $this->_ci_prepare_view_vars($vars);
+		if (is_string($vars))
+		{
+			$vars = array($vars => $val);
+		}
 
-		foreach ($vars as $key => $val)
+		$vars = $this->_ci_object_to_array($vars);
+
+		if (is_array($vars) && count($vars) > 0)
+		{
+			foreach ($vars as $key => $val)
 			{
 				$this->_ci_cached_vars[$key] = $val;
+			}
 		}
 
 		return $this;
@@ -613,21 +592,15 @@ class CI_Loader {
 	 */
 	public function helper($helpers = array())
 	{
-		is_array($helpers) OR $helpers = array($helpers);
-		foreach ($helpers as &$helper)
+		foreach ($this->_ci_prep_filename($helpers, '_helper') as $helper)
 		{
-			$filename = basename($helper);
-			$filepath = ($filename === $helper) ? '' : substr($helper, 0, strlen($helper) - strlen($filename));
-			$filename = strtolower(preg_replace('#(_helper)?(\.php)?$#i', '', $filename)).'_helper';
-			$helper   = $filepath.$filename;
-
 			if (isset($this->_ci_helpers[$helper]))
 			{
 				continue;
 			}
 
 			// Is this a helper extension request?
-			$ext_helper = config_item('subclass_prefix').$filename;
+			$ext_helper = config_item('subclass_prefix').$helper;
 			$ext_loaded = FALSE;
 			foreach ($this->_ci_helper_paths as $path)
 			{
@@ -962,22 +935,19 @@ class CI_Loader {
 		 * the two types and cache them so that views that are embedded within
 		 * other views can have access to these variables.
 		 */
-
-		is_array($_ci_vars) OR $_ci_vars = array();
-
-		// Include the global cached vars into the current _ci_vars if needed
-		empty($this->_ci_cached_vars) OR $_ci_vars = array_merge($this->_ci_cached_vars, $_ci_vars);
-
-		// Merge the last variable configuration from a parent _ci_load()
-		// call into the current _ci_vars
-		if ( ! empty($this->_ci_load_vars_stack))
+		if (is_array($_ci_vars))
 		{
-			$previous_variable_configuration = end($this->_ci_load_vars_stack);
-			$_ci_vars = array_merge($previous_variable_configuration, $_ci_vars);
-		}
+			foreach (array_keys($_ci_vars) as $key)
+			{
+				if (strncmp($key, '_ci_', 4) === 0)
+				{
+					unset($_ci_vars[$key]);
+				}
+			}
 
-		array_push($this->_ci_load_vars_stack, $_ci_vars);
-		extract($_ci_vars);
+			$this->_ci_cached_vars = array_merge($this->_ci_cached_vars, $_ci_vars);
+		}
+		extract($this->_ci_cached_vars);
 
 		/*
 		 * Buffer the output
@@ -992,11 +962,19 @@ class CI_Loader {
 		 */
 		ob_start();
 
-		include($_ci_path); // include() vs include_once() allows for multiple views with the same name
-		log_message('info', 'File loaded: '.$_ci_path);
+		// If the PHP installation does not support short tags we'll
+		// do a little string replacement, changing the short tags
+		// to standard PHP echo statements.
+		if ( ! is_php('5.4') && ! ini_get('short_open_tag') && config_item('rewrite_short_tags') === TRUE)
+		{
+			echo eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', file_get_contents($_ci_path))));
+		}
+		else
+		{
+			include($_ci_path); // include() vs include_once() allows for multiple views with the same name
+		}
 
-		// Remove current _ci_vars from stack
-		array_pop($this->_ci_load_vars_stack);
+		log_message('info', 'File loaded: '.$_ci_path);
 
 		// Return the file data if requested
 		if ($_ci_return === TRUE)
@@ -1071,26 +1049,6 @@ class CI_Loader {
 			return $this->_ci_load_stock_library($class, $subdir, $params, $object_name);
 		}
 
-		// Safety: Was the class already loaded by a previous call?
-		if (class_exists($class, FALSE))
-		{
-			$property = $object_name;
-			if (empty($property))
-			{
-				$property = strtolower($class);
-				isset($this->_ci_varmap[$property]) && $property = $this->_ci_varmap[$property];
-			}
-
-			$CI =& get_instance();
-			if (isset($CI->$property))
-			{
-				log_message('debug', $class.' class already loaded. Second attempt ignored.');
-				return;
-			}
-
-			return $this->_ci_init_library($class, '', $params, $object_name);
-		}
-
 		// Let's search for the requested library file and load it.
 		foreach ($this->_ci_library_paths as $path)
 		{
@@ -1103,7 +1061,25 @@ class CI_Loader {
 			$filepath = $path.'libraries/'.$subdir.$class.'.php';
 
 			// Safety: Was the class already loaded by a previous call?
-			if ( ! file_exists($filepath))
+			if (class_exists($class, FALSE))
+			{
+				// Before we deem this to be a duplicate request, let's see
+				// if a custom object name is being supplied. If so, we'll
+				// return a new instance of the object
+				if ($object_name !== NULL)
+				{
+					$CI =& get_instance();
+					if ( ! isset($CI->$object_name))
+					{
+						return $this->_ci_init_library($class, '', $params, $object_name);
+					}
+				}
+
+				log_message('debug', $class.' class already loaded. Second attempt ignored.');
+				return;
+			}
+			// Does the file exist? No? Bummer...
+			elseif ( ! file_exists($filepath))
 			{
 				continue;
 			}
@@ -1148,17 +1124,16 @@ class CI_Loader {
 				$prefix = config_item('subclass_prefix');
 			}
 
-			$property = $object_name;
-			if (empty($property))
+			// Before we deem this to be a duplicate request, let's see
+			// if a custom object name is being supplied. If so, we'll
+			// return a new instance of the object
+			if ($object_name !== NULL)
 			{
-				$property = strtolower($library_name);
-				isset($this->_ci_varmap[$property]) && $property = $this->_ci_varmap[$property];
-			}
-
-			$CI =& get_instance();
-				if ( ! isset($CI->$property))
+				$CI =& get_instance();
+				if ( ! isset($CI->$object_name))
 				{
 					return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+				}
 			}
 
 			log_message('debug', $library_name.' class already loaded. Second attempt ignored.');
@@ -1180,8 +1155,10 @@ class CI_Loader {
 				{
 					return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 				}
-
-				log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
+				else
+				{
+					log_message('debug', $path.' exists, but does not declare '.$prefix.$library_name);
+				}
 			}
 		}
 
@@ -1199,8 +1176,10 @@ class CI_Loader {
 					$prefix = config_item('subclass_prefix');
 					break;
 				}
-
-				log_message('debug', $path.' exists, but does not declare '.$subclass);
+				else
+				{
+					log_message('debug', $path.' exists, but does not declare '.$subclass);
+				}
 			}
 		}
 
@@ -1406,22 +1385,9 @@ class CI_Loader {
 	 * @param	object	$object	Object data to translate
 	 * @return	array
 	 */
-	protected function _ci_prepare_view_vars($vars)
+	protected function _ci_object_to_array($object)
 	{
-		if ( ! is_array($vars))
-		{
-			$vars = is_object($vars) ? get_object_vars($vars) : array();
-		}
-
-		foreach (array_keys($vars) as $key)
-		{
-			if (strncmp($key, '_ci_', 4) === 0)
-			{
-				unset($vars[$key]);
-			}
-		}
-
-		return $vars;
+		return is_object($object) ? get_object_vars($object) : $object;
 	}
 
 	// --------------------------------------------------------------------
@@ -1439,4 +1405,34 @@ class CI_Loader {
 		$CI =& get_instance();
 		return $CI->$component;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep filename
+	 *
+	 * This function prepares filenames of various items to
+	 * make their loading more reliable.
+	 *
+	 * @param	string|string[]	$filename	Filename(s)
+	 * @param 	string		$extension	Filename extension
+	 * @return	array
+	 */
+	protected function _ci_prep_filename($filename, $extension)
+	{
+		if ( ! is_array($filename))
+		{
+			return array(strtolower(str_replace(array($extension, '.php'), '', $filename).$extension));
+		}
+		else
+		{
+			foreach ($filename as $key => $val)
+			{
+				$filename[$key] = strtolower(str_replace(array($extension, '.php'), '', $val).$extension);
+			}
+
+			return $filename;
+		}
+	}
+
 }

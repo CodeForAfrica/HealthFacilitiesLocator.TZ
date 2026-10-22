@@ -98,7 +98,7 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 
 			if ( ! empty($this->username))
 			{
-				$this->dsn .= ';user='.$this->username;
+				$this->dsn .= ';username='.$this->username;
 				empty($this->password) OR $this->dsn .= ';password='.$this->password;
 			}
 		}
@@ -255,7 +255,7 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 	{
 		return 'SELECT "column_name"
 			FROM "information_schema"."columns"
-			WHERE "table_schema" = \''.$this->schema.'\' AND LOWER("table_name") = '.$this->escape(strtolower($table));
+			WHERE LOWER("table_name") = '.$this->escape(strtolower($table));
 	}
 
 	// --------------------------------------------------------------------
@@ -270,7 +270,7 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 	{
 		$sql = 'SELECT "column_name", "data_type", "character_maximum_length", "numeric_precision", "column_default"
 			FROM "information_schema"."columns"
-			WHERE "table_schema" = \''.$this->schema.'\' AND LOWER("table_name") = '.$this->escape(strtolower($table));
+			WHERE LOWER("table_name") = '.$this->escape(strtolower($table));
 
 		if (($query = $this->query($sql)) === FALSE)
 		{
@@ -326,13 +326,13 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 		$ids = array();
 		foreach ($values as $key => $val)
 		{
-			$ids[] = $val[$index]['value'];
+			$ids[] = $val[$index];
 
 			foreach (array_keys($val) as $field)
 			{
 				if ($field !== $index)
 				{
-					$final[$val[$field]['field']][] = 'WHEN '.$val[$index]['value'].' THEN '.$val[$field]['value'];
+					$final[$field][] = 'WHEN '.$val[$index].' THEN '.$val[$field];
 				}
 			}
 		}
@@ -340,12 +340,12 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 		$cases = '';
 		foreach ($final as $k => $v)
 		{
-			$cases .= $k.' = (CASE '.$val[$index]['field']."\n"
+			$cases .= $k.' = (CASE '.$index."\n"
 				.implode("\n", $v)."\n"
 				.'ELSE '.$k.' END), ';
 		}
 
-		$this->where($val[$index]['field'].' IN('.implode(',', $ids).')', NULL, FALSE);
+		$this->where($index.' IN('.implode(',', $ids).')', NULL, FALSE);
 
 		return 'UPDATE '.$table.' SET '.substr($cases, 0, -2).$this->_compile_wh('qb_where');
 	}

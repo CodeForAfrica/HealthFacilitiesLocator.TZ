@@ -102,22 +102,10 @@ class CI_Cache_memcached extends CI_Driver {
 			return;
 		}
 
-		foreach ($this->_config as $cache_name => $cache_server)
+		foreach ($this->_config as $cache_server)
 		{
-			if ( ! isset($cache_server['hostname']))
-			{
-				log_message('debug', 'Cache: Memcache(d) configuration "'.$cache_name.'" doesn\'t include a hostname; ignoring.');
-				continue;
-			}
-			elseif ($cache_server['hostname'][0] === '/')
-			{
-				$cache_server['port'] = 0;
-			}
-			elseif (empty($cache_server['port']))
-			{
-				$cache_server['port'] = $defaults['port'];
-			}
-
+			isset($cache_server['hostname']) OR $cache_server['hostname'] = $defaults['host'];
+			isset($cache_server['port']) OR $cache_server['port'] = $defaults['port'];
 			isset($cache_server['weight']) OR $cache_server['weight'] = $defaults['weight'];
 
 			if ($this->_memcached instanceof Memcache)
@@ -210,12 +198,7 @@ class CI_Cache_memcached extends CI_Driver {
 	 */
 	public function increment($id, $offset = 1)
 	{
-		if (($result = $this->_memcached->increment($id, $offset)) === FALSE)
-		{
-			return $this->_memcached->add($id, $offset) ? $offset : FALSE;
-		}
-
-		return $result;
+		return $this->_memcached->increment($id, $offset);
 	}
 
 	// ------------------------------------------------------------------------
@@ -229,12 +212,7 @@ class CI_Cache_memcached extends CI_Driver {
 	 */
 	public function decrement($id, $offset = 1)
 	{
-		if (($result = $this->_memcached->decrement($id, $offset)) === FALSE)
-		{
-			return $this->_memcached->add($id, 0) ? 0 : FALSE;
-		}
-
-		return $result;
+		return $this->_memcached->decrement($id, $offset);
 	}
 
 	// ------------------------------------------------------------------------

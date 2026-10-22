@@ -84,14 +84,6 @@ class CI_Image_lib {
 	 */
 	public $new_image		= '';
 
-
-	/**
-	 * Path to destination image
-	 *
-	 * @var string
-	 */
-	public $dest_image		= '';
-
 	/**
 	 * Image width
 	 *
@@ -400,16 +392,6 @@ class CI_Image_lib {
 			$this->initialize($props);
 		}
 
-		/**
-		 * A work-around for some improperly formatted, but
-		 * usable JPEGs; known to be produced by Samsung
-		 * smartphones' front-facing cameras.
-		 *
-		 * @see	https://github.com/bcit-ci/CodeIgniter/issues/4967
-		 * @see	https://bugs.php.net/bug.php?id=72404
-		 */
-		ini_set('gd.jpeg_ignore_warning', 1);
-
 		log_message('info', 'Image Lib Class Initialized');
 	}
 
@@ -565,27 +547,34 @@ class CI_Image_lib {
 			$this->dest_image = $this->source_image;
 			$this->dest_folder = $this->source_folder;
 		}
-		elseif (strpos($this->new_image, '/') === FALSE && strpos($this->new_image, '\\') === FALSE)
-			{
-			$this->dest_image  = $this->new_image;
+		elseif (strpos($this->new_image, '/') === FALSE)
+		{
 			$this->dest_folder = $this->source_folder;
+			$this->dest_image = $this->new_image;
 		}
 		else
 		{
-			// Is there a file name?
-			if ( ! preg_match('#\.(jpg|jpeg|gif|png)$#i', $this->new_image))
+			if (strpos($this->new_image, '/') === FALSE && strpos($this->new_image, '\\') === FALSE)
 			{
-				$this->dest_image = $this->source_image;
-				$this->dest_folder = $this->new_image;
+				$full_dest_path = str_replace('\\', '/', realpath($this->new_image));
 			}
 			else
 			{
-				$x = explode('/', str_replace('\\', '/', $this->new_image));
-				$this->dest_image = end($x);
-				$this->dest_folder = str_replace($this->dest_image, '', $this->new_image);
+				$full_dest_path = $this->new_image;
 			}
 
-			$this->dest_folder = realpath($this->dest_folder).'/';
+			// Is there a file name?
+			if ( ! preg_match('#\.(jpg|jpeg|gif|png)$#i', $full_dest_path))
+			{
+				$this->dest_folder = $full_dest_path.'/';
+				$this->dest_image = $this->source_image;
+			}
+			else
+			{
+				$x = explode('/', $full_dest_path);
+				$this->dest_image = end($x);
+				$this->dest_folder = str_replace($this->dest_image, '', $full_dest_path);
+			}
 		}
 
 		/* Compile the finalized filenames/paths
@@ -840,16 +829,10 @@ class CI_Image_lib {
 		}
 
 		// Kill the file handles
-		if (PHP_VERSION_ID < 80000)
-		{
-			imagedestroy($dst_img);
+		imagedestroy($dst_img);
 		imagedestroy($src_img);
-		}
 
-		if ($this->dynamic_output !== TRUE)
-		{
-			chmod($this->full_dst_path, $this->file_permissions);
-		}
+		chmod($this->full_dst_path, $this->file_permissions);
 
 		return TRUE;
 	}
@@ -903,7 +886,7 @@ class CI_Image_lib {
 			}
 		}
 
-		$cmd .= ' '.escapeshellarg($this->full_src_path).' '.escapeshellarg($this->full_dst_path).' 2>&1';
+		$cmd .= escapeshellarg($this->full_src_path).' '.escapeshellarg($this->full_dst_path).' 2>&1';
 
 		$retval = 1;
 		// exec() might be disabled
@@ -957,10 +940,6 @@ class CI_Image_lib {
 				$cmd_in		= 'pngtopnm';
 				$cmd_out	= 'ppmtopng';
 				break;
-			case 18 :
-				$cmd_in		= 'webptopnm';
-				$cmd_out	= 'ppmtowebp';
-				break;
 		}
 
 		if ($action === 'crop')
@@ -990,7 +969,7 @@ class CI_Image_lib {
 			$cmd_inner = 'pnmscale -xysize '.$this->width.' '.$this->height;
 		}
 
-		$cmd = $this->library_path.$cmd_in.' '.escapeshellarg($this->full_src_path).' | '.$cmd_inner.' | '.$cmd_out.' > '.$this->dest_folder.'netpbm.tmp';
+		$cmd = $this->library_path.$cmd_in.' '.$this->full_src_path.' | '.$cmd_inner.' | '.$cmd_out.' > '.$this->dest_folder.'netpbm.tmp';
 
 		$retval = 1;
 		// exec() might be disabled
@@ -1052,11 +1031,8 @@ class CI_Image_lib {
 		}
 
 		// Kill the file handles
-		if (PHP_VERSION_ID < 80000)
-		{
-			imagedestroy($dst_img);
+		imagedestroy($dst_img);
 		imagedestroy($src_img);
-		}
 
 		chmod($this->full_dst_path, $this->file_permissions);
 
@@ -1134,10 +1110,7 @@ class CI_Image_lib {
 		}
 
 		// Kill the file handles
-		if (PHP_VERSION_ID < 80000)
-		{
-			imagedestroy($src_img);
-		}
+		imagedestroy($src_img);
 
 		chmod($this->full_dst_path, $this->file_permissions);
 
@@ -1228,7 +1201,7 @@ class CI_Image_lib {
 		}
 
 		// Build the finalized image
-		if ($wm_img_type === 3)
+		if ($wm_img_type === 3 && function_exists('imagealphablending'))
 		{
 			@imagealphablending($src_img, TRUE);
 		}
@@ -1267,11 +1240,8 @@ class CI_Image_lib {
 			return FALSE;
 		}
 
-		if (PHP_VERSION_ID < 80000)
-		{
-			imagedestroy($src_img);
+		imagedestroy($src_img);
 		imagedestroy($wm_img);
-		}
 
 		return TRUE;
 	}
@@ -1441,10 +1411,7 @@ class CI_Image_lib {
 			$this->image_save_gd($src_img);
 		}
 
-		if (PHP_VERSION_ID < 80000)
-		{
-			imagedestroy($src_img);
-		}
+		imagedestroy($src_img);
 
 		return TRUE;
 	}
@@ -1499,14 +1466,6 @@ class CI_Image_lib {
 				}
 
 				return imagecreatefrompng($path);
-			case 18:
-				if ( ! function_exists('imagecreatefromwebp'))
-				{
-					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_webp_not_supported'));
-					return FALSE;
-				}
-
-				return imagecreatefromwebp($path);
 			default:
 				$this->set_error(array('imglib_unsupported_imagecreate'));
 				return FALSE;
@@ -1567,19 +1526,6 @@ class CI_Image_lib {
 					return FALSE;
 				}
 			break;
-			case 18:
-				if ( ! function_exists('imagewebp'))
-				{
-					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_webp_not_supported'));
-					return FALSE;
-				}
-
-				if ( ! @imagewebp($resource, $this->full_dst_path))
-				{
-					$this->set_error('imglib_save_failed');
-					return FALSE;
-				}
-			break;
 			default:
 				$this->set_error(array('imglib_unsupported_imagecreate'));
 				return FALSE;
@@ -1599,16 +1545,7 @@ class CI_Image_lib {
 	 */
 	public function image_display_gd($resource)
 	{
-		// RFC 6266 allows for multibyte filenames, but only in UTF-8,
-		// so we have to make it conditional ...
-		$filename = basename(empty($this->new_image) ? $this->source_image : $this->new_image);
-		$charset = strtoupper(config_item('charset'));
-		$utf8_filename = ($charset !== 'UTF-8')
-			? get_instance()->utf8->convert_to_utf8($filename, $charset)
-			: $filename;
-		isset($utf8_filename[0]) && $utf8_filename = " filename*=UTF-8''".rawurlencode($utf8_filename);
-
-		header('Content-Disposition: filename="'.$filename.'";'.$utf8_filename);
+		header('Content-Disposition: filename='.$this->source_image.';');
 		header('Content-Type: '.$this->mime_type);
 		header('Content-Transfer-Encoding: binary');
 		header('Last-Modified: '.gmdate('D, d M Y H:i:s', time()).' GMT');
@@ -1620,8 +1557,6 @@ class CI_Image_lib {
 			case 2	:	imagejpeg($resource, NULL, $this->quality);
 				break;
 			case 3	:	imagepng($resource);
-				break;
-			case 18	:	imagewebp($resource);
 				break;
 			default:	echo 'Unable to display the image';
 				break;
@@ -1711,14 +1646,8 @@ class CI_Image_lib {
 		}
 
 		$vals = getimagesize($path);
-		if ($vals === FALSE)
-		{
-			$this->set_error('imglib_invalid_image');
-			return FALSE;
-		}
-
 		$types = array(1 => 'gif', 2 => 'jpeg', 3 => 'png');
-		$mime = isset($types[$vals[2]]) ? 'image/'.$types[$vals[2]] : 'image/jpg';
+		$mime = (isset($types[$vals[2]])) ? 'image/'.$types[$vals[2]] : 'image/jpg';
 
 		if ($return === TRUE)
 		{

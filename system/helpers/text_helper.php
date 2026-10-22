@@ -102,7 +102,7 @@ if ( ! function_exists('character_limiter'))
 		}
 
 		// a bit complicated, but faster than preg_replace with \s+
-		$str = preg_replace('/ {2,}/', ' ', str_replace(array("\r", "\n", "\t", "\v", "\f"), ' ', $str));
+		$str = preg_replace('/ {2,}/', ' ', str_replace(array("\r", "\n", "\t", "\x0B", "\x0C"), ' ', $str));
 
 		if (mb_strlen($str) <= $n)
 		{
@@ -138,10 +138,7 @@ if ( ! function_exists('ascii_to_entities'))
 	function ascii_to_entities($str)
 	{
 		$out = '';
-		$length = defined('MB_OVERLOAD_STRING')
-			? mb_strlen($str, '8bit') - 1
-			: strlen($str) - 1;
-		for ($i = 0, $count = 1, $temp = array(); $i <= $length; $i++)
+		for ($i = 0, $s = strlen($str) - 1, $count = 1, $temp = array(); $i <= $s; $i++)
 		{
 			$ordinal = ord($str[$i]);
 
@@ -179,7 +176,7 @@ if ( ! function_exists('ascii_to_entities'))
 					$temp = array();
 				}
 				// If this is the last iteration, just output whatever we have
-				elseif ($i === $length)
+				elseif ($i === $s)
 				{
 					$out .= '&#'.implode(';', $temp).';';
 				}
@@ -342,12 +339,12 @@ if ( ! function_exists('highlight_code'))
 		$str = preg_replace(
 			array(
 				'/<span style="color: #([A-Z0-9]+)">&lt;\?php(&nbsp;| )/i',
-				'/(<span style="color: #[A-Z0-9]+">.*?)\?&gt;<\/span>(\n<\/span>\n<\/code>|<\/code><\/pre>)/is',
+				'/(<span style="color: #[A-Z0-9]+">.*?)\?&gt;<\/span>\n<\/span>\n<\/code>/is',
 				'/<span style="color: #[A-Z0-9]+"\><\/span>/i'
 			),
 			array(
 				'<span style="color: #$1">',
-				'$1</span>$2',
+				"$1</span>\n</span>\n</code>",
 				''
 			),
 			$str
@@ -422,8 +419,6 @@ if ( ! function_exists('convert_accented_characters'))
 			$array_from = array_keys($foreign_characters);
 			$array_to = array_values($foreign_characters);
 		}
-
-		$str = (gettype($str) === 'NULL') ? '' : $str;
 
 		return preg_replace($array_from, $array_to, $str);
 	}

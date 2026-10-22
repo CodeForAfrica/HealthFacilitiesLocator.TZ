@@ -180,6 +180,48 @@ class CI_DB_pdo_cubrid_driver extends CI_DB_pdo_driver {
 	 * @param	string	$index	WHERE key
 	 * @return	string
 	 */
+	protected function _update_batch($table, $values, $index)
+	{
+		$ids = array();
+		foreach ($values as $key => $val)
+		{
+			$ids[] = $val[$index];
+
+			foreach (array_keys($val) as $field)
+			{
+				if ($field !== $index)
+				{
+					$final[$field][] = 'WHEN '.$index.' = '.$val[$index].' THEN '.$val[$field];
+				}
+			}
+		}
+
+		$cases = '';
+		foreach ($final as $k => $v)
+		{
+			$cases .= $k." = CASE \n"
+				.implode("\n", $v)."\n"
+				.'ELSE '.$k.' END), ';
+		}
+
+		$this->where($index.' IN('.implode(',', $ids).')', NULL, FALSE);
+
+		return 'UPDATE '.$table.' SET '.substr($cases, 0, -2).$this->_compile_wh('qb_where');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Truncate statement
+	 *
+	 * Generates a platform-specific truncate string from the supplied data
+	 *
+	 * If the database does not support the TRUNCATE statement,
+	 * then this method maps to 'DELETE FROM table'
+	 *
+	 * @param	string	$table
+	 * @return	string
+	 */
 	protected function _truncate($table)
 	{
 		return 'TRUNCATE '.$table;

@@ -35,9 +35,6 @@
  * @since	Version 2.1.0
  * @filesource
  */
-
-use DebugBar\DataCollector\PDO\TraceablePDO;
-
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
@@ -67,9 +64,7 @@ class CI_DB_pdo_driver extends CI_DB {
 	 *
 	 * @var	array
 	 */
-	public $options = array(
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-	);
+	public $options = array();
 
 	// --------------------------------------------------------------------
 
@@ -131,30 +126,14 @@ class CI_DB_pdo_driver extends CI_DB {
 	 */
 	public function db_connect($persistent = FALSE)
 	{
-		global $debugbar;
-
 		if ($persistent === TRUE)
 		{
 			$this->options[PDO::ATTR_PERSISTENT] = TRUE;
 		}
 
-		// From PHP8.0, default PDO::ATTR_ERRMODE is changed
-		// from PDO::ERRMODE_SILENT to PDO::ERRMODE_EXCEPTION
-		// as https://wiki.php.net/rfc/pdo_default_errmode
-		if ( ! isset($this->options[PDO::ATTR_ERRMODE]))
-		{
-			$this->options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_SILENT;
-		}
-
 		try
 		{
-			if ($debugbar) {
-				$pdo = new TraceablePDO(new PDO($this->dsn, $this->username, $this->password, $this->options));
-				$debugbar->addCollector(new DebugBar\DataCollector\PDO\PDOCollector($pdo));
-				return $pdo;
-			} else {
 			return new PDO($this->dsn, $this->username, $this->password, $this->options);
-			}
 		}
 		catch (PDOException $e)
 		{
@@ -341,9 +320,38 @@ class CI_DB_pdo_driver extends CI_DB {
 	 * @param	string	$index	WHERE key
 	 * @return	string
 	 */
-	protected function _truncate($table)
+	protected function _update_batch($table, $values, $index)
 	{
-		return 'TRUNCATE TABLE '.$table;
+		$ids = array();
+		foreach ($values as $key => $val)
+		{
+			$ids[] = $val[$index];
+
+			foreach (array_keys($val) as $field)
+			{
+				if ($field !== $index)
+				{
+					$final[$field][] = 'WHEN '.$index.' = '.$val[$index].' THEN '.$val[$field];
+				}
+			}
+		}
+
+		$cases = '';
+		foreach ($final as $k => $v)
+		{
+			$cases .= $k.' = CASE '."\n";
+
+			foreach ($v as $row)
+			{
+				$cases .= $row."\n";
+			}
+
+			$cases .= 'ELSE '.$k.' END, ';
+		}
+
+		$this->where($index.' IN('.implode(',', $ids).')', NULL, FALSE);
+
+		return 'UPDATE '.$table.' SET '.substr($cases, 0, -2).$this->_compile_wh('qb_where');
 	}
 
 	// --------------------------------------------------------------------
@@ -359,10 +367,9 @@ class CI_DB_pdo_driver extends CI_DB {
 	 * @param	string	$table
 	 * @return	string
 	 */
-	protected function _close()
+	protected function _truncate($table)
 	{
-		$this->result_id = FALSE;
-		$this->conn_id = FALSE;
+		return 'TRUNCATE TABLE '.$table;
 	}
 
 }

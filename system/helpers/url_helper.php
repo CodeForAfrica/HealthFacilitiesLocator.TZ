@@ -393,10 +393,10 @@ if ( ! function_exists('auto_link'))
 	function auto_link($str, $type = 'both', $popup = FALSE)
 	{
 		// Find and replace any URLs.
-		if ($type !== 'email' && preg_match_all('#(\w*://|www\.)[a-z0-9]+(-+[a-z0-9]+)*(\.[a-z0-9]+(-+[a-z0-9]+)*)+(/([^\s()<>;]+\w)?/?)?#i', $str, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER))
+		if ($type !== 'email' && preg_match_all('#(\w*://|www\.)[^\s()<>;]+\w#i', $str, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER))
 		{
 			// Set our target HTML if using popup links.
-			$target = ($popup) ? ' target="_blank" rel="noopener"' : '';
+			$target = ($popup) ? ' target="_blank"' : '';
 
 			// We process the links in reverse order (last -> first) so that
 			// the returned string offsets from preg_match_all() are not
@@ -443,7 +443,7 @@ if ( ! function_exists('prep_url'))
 	 */
 	function prep_url($str = '')
 	{
-		if ($str === '')
+		if ($str === 'http://' OR $str === '')
 		{
 			return '';
 		}
@@ -494,7 +494,7 @@ if ( ! function_exists('url_title'))
 			'&.+?;'			=> '',
 			'[^\w\d _-]'		=> '',
 			'\s+'			=> $separator,
-			'('.$q_separator.')+'	=> $separator,
+			'('.$q_separator.')+'	=> $separator
 		);
 
 		$str = strip_tags($str);

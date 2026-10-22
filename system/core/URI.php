@@ -50,11 +50,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class CI_URI {
 
-	/**
-	 * CI_Config instance
-	 *
-	 * @var	CI_Config
-	 */
 	public $config;
 
 	/**
@@ -103,21 +98,24 @@ class CI_URI {
 	 *
 	 * @return	void
 	 */
-	public function __construct(CI_Config $config)
+	public function __construct()
 	{
-		$this->config = $config;
+		$this->config =& load_class('Config', 'core');
 
 		// If query strings are enabled, we don't need to parse any segments.
 		// However, they don't make sense under CLI.
-		if (is_cli())
-		{
-			$this->_set_uri_string($this->_parse_argv(), TRUE);
-		}
-		// If query strings are enabled, we don't need to parse any segments.
-		elseif ($this->config->item('enable_query_strings') !== TRUE)
+		if (is_cli() OR $this->config->item('enable_query_strings') !== TRUE)
 		{
 			$this->_permitted_uri_chars = $this->config->item('permitted_uri_chars');
-			$protocol = $this->config->item('uri_protocol');
+
+			// If it's a CLI request, ignore the configuration
+			if (is_cli())
+			{
+				$uri = $this->_parse_argv();
+			}
+			else
+			{
+				$protocol = $this->config->item('uri_protocol');
 				empty($protocol) && $protocol = 'REQUEST_URI';
 
 				switch ($protocol)
@@ -136,8 +134,9 @@ class CI_URI {
 							: $this->_parse_request_uri();
 						break;
 				}
+			}
 
-			$this->_set_uri_string($uri, FALSE);
+			$this->_set_uri_string($uri);
 		}
 
 		log_message('info', 'URI Class Initialized');
@@ -151,39 +150,15 @@ class CI_URI {
 	 * @param 	string	$str
 	 * @return	void
 	 */
-	protected function _set_uri_string($str, $is_cli = FALSE)
+	protected function _set_uri_string($str)
 	{
-		// CLI requests have a bit simpler logic
-		if ($is_cli)
-		{
-			if (($this->uri_string = trim($str, '/')) === '')
-			{
-				return;
-			}
-
-			$this->segments[0] = NULL;
-			foreach (explode('/', $this->uri_string) as $segment)
-			{
-				if (($segment = trim($segment)) !== '')
-				{
-					$this->segments[] = $segment;
-				}
-			}
-
-			unset($this->segments[0]);
-			return;
-		}
-
 		// Filter out control characters and trim slashes
 		$this->uri_string = trim(remove_invisible_characters($str, FALSE), '/');
 
-		if ($this->uri_string === '')
+		if ($this->uri_string !== '')
 		{
-			return;
-		}
-
-		// Remove the URL suffix, if present
-		if (($suffix = (string) $this->config->item('url_suffix')) !== '')
+			// Remove the URL suffix, if present
+			if (($suffix = (string) $this->config->item('url_suffix')) !== '')
 			{
 				$slen = strlen($suffix);
 
@@ -195,19 +170,20 @@ class CI_URI {
 
 			$this->segments[0] = NULL;
 			// Populate the segments array
-			foreach (explode('/', trim($this->uri_string, '/')) as $segment)
+			foreach (explode('/', trim($this->uri_string, '/')) as $val)
 			{
-			$segment = trim($segment);
+				$val = trim($val);
 				// Filter segments for security
-				$this->filter_uri($segment);
+				$this->filter_uri($val);
 
-				if ($segment !== '')
+				if ($val !== '')
 				{
-					$this->segments[] = $segment;
+					$this->segments[] = $val;
 				}
 			}
 
 			unset($this->segments[0]);
+		}
 	}
 
 	// --------------------------------------------------------------------

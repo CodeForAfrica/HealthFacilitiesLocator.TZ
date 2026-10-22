@@ -110,7 +110,7 @@ class CI_Zip {
 	 *
 	 * @var	bool
 	 */
-	protected static $func_overload;
+	protected static $func_override;
 
 	/**
 	 * Initialize zip compression class
@@ -119,7 +119,7 @@ class CI_Zip {
 	 */
 	public function __construct()
 	{
-		isset(self::$func_overload) OR self::$func_overload = ( ! is_php('8.0') && extension_loaded('mbstring') && @ini_get('mbstring.func_overload'));
+		isset(self::$func_override) OR self::$func_override = (extension_loaded('mbstring') && ini_get('mbstring.func_override'));
 
 		$this->now = time();
 		log_message('info', 'Zip Compression Class Initialized');
@@ -366,7 +366,7 @@ class CI_Zip {
 
 		while (FALSE !== ($file = readdir($fp)))
 		{
-			if ($file === '.' OR $file === '..')
+			if ($file[0] === '.')
 			{
 				continue;
 			}
@@ -406,14 +406,13 @@ class CI_Zip {
 			return FALSE;
 		}
 
-		// @see https://github.com/bcit-ci/CodeIgniter/issues/5864
-		$footer = $this->directory."\x50\x4b\x05\x06\x00\x00\x00\x00"
+		return $this->zipdata
+			.$this->directory."\x50\x4b\x05\x06\x00\x00\x00\x00"
 			.pack('v', $this->entries) // total # of entries "on this disk"
 			.pack('v', $this->entries) // total # of entries overall
 			.pack('V', self::strlen($this->directory)) // size of central dir
 			.pack('V', self::strlen($this->zipdata)) // offset to start of central dir
 			."\x00\x00"; // .zip file comment length
-		return $this->zipdata.$footer; // .zip file comment length
 	}
 
 	// --------------------------------------------------------------------
@@ -501,7 +500,7 @@ class CI_Zip {
 	 */
 	protected static function strlen($str)
 	{
-		return (self::$func_overload)
+		return (self::$func_override)
 			? mb_strlen($str, '8bit')
 			: strlen($str);
 	}
@@ -518,8 +517,11 @@ class CI_Zip {
 	 */
 	protected static function substr($str, $start, $length = NULL)
 	{
-		if (self::$func_overload)
+		if (self::$func_override)
 		{
+			// mb_substr($str, $start, null, '8bit') returns an empty
+			// string on PHP 5.3
+			isset($length) OR $length = ($start >= 0 ? self::strlen($str) - $start : -$start);
 			return mb_substr($str, $start, $length, '8bit');
 		}
 

@@ -46,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/libraries/config.html
  */
-#[AllowDynamicProperties]
+#[\AllowDynamicProperties]
 class CI_Model {
 
 	/**
@@ -55,7 +55,9 @@ class CI_Model {
 	 * @return	void
 	 */
 	public function __construct()
-	{}
+	{
+		log_message('info', 'Model Class Initialized');
+	}
 
 	// --------------------------------------------------------------------
 

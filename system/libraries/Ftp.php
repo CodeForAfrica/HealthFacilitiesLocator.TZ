@@ -202,7 +202,7 @@ class CI_FTP {
 	 */
 	protected function _is_conn()
 	{
-		if ($this->conn_id === FALSE)
+		if ( ! is_resource($this->conn_id))
 		{
 			if ($this->debug === TRUE)
 			{

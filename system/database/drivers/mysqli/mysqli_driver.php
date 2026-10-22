@@ -116,13 +116,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	public function db_connect($persistent = FALSE)
 	{
-		// PHP 8.1 changes default error handling mode from silent to exceptions - reverse that
-		if (is_php('8.1'))
-		{
-			$mysqli_driver = new mysqli_driver();
-			$mysqli_driver->report_mode = MYSQLI_REPORT_OFF;
-		}
-
+		mysqli_report(MYSQLI_REPORT_OFF);
 		// Do we have a socket path?
 		if ($this->hostname[0] === '/')
 		{
@@ -174,11 +168,11 @@ class CI_DB_mysqli_driver extends CI_DB {
 			empty($this->encrypt['ssl_capath']) OR $ssl['capath'] = $this->encrypt['ssl_capath'];
 			empty($this->encrypt['ssl_cipher']) OR $ssl['cipher'] = $this->encrypt['ssl_cipher'];
 
-			if (isset($this->encrypt['ssl_verify']))
+			if ( ! empty($ssl))
+			{
+				if (isset($this->encrypt['ssl_verify']))
 				{
-				$client_flags |= MYSQLI_CLIENT_SSL;
-
-				if ($this->encrypt['ssl_verify'])
+					if ($this->encrypt['ssl_verify'])
 					{
 						defined('MYSQLI_OPT_SSL_VERIFY_SERVER_CERT') && $this->_mysqli->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, TRUE);
 					}
@@ -194,8 +188,6 @@ class CI_DB_mysqli_driver extends CI_DB {
 					}
 				}
 
-			if ( ! empty($ssl))
-			{
 				$client_flags |= MYSQLI_CLIENT_SSL;
 				$this->_mysqli->ssl_set(
 					isset($ssl['key'])    ? $ssl['key']    : NULL,
@@ -219,14 +211,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 				$this->_mysqli->close();
 				$message = 'MySQLi was configured for an SSL connection, but got an unencrypted connection instead!';
 				log_message('error', $message);
-				return ($this->db_debug) ? $this->display_error($message, '', TRUE) : FALSE;
-			}
-
-			if ( ! $this->_mysqli->set_charset($this->char_set))
-			{
-				log_message('error', "Database: Unable to set the configured connection charset ('{$this->char_set}').");
-				$this->_mysqli->close();
-				return ($this->db->db_debug) ? $this->display_error('db_unable_to_set_charset', $this->char_set) : FALSE;
+				return ($this->db->db_debug) ? $this->db->display_error($message, '', TRUE) : FALSE;
 			}
 
 			return $this->_mysqli;
@@ -276,6 +261,19 @@ class CI_DB_mysqli_driver extends CI_DB {
 		}
 
 		return FALSE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set client character set
+	 *
+	 * @param	string	$charset
+	 * @return	bool
+	 */
+	protected function _db_set_charset($charset)
+	{
+		return $this->conn_id->set_charset($charset);
 	}
 
 	// --------------------------------------------------------------------
@@ -430,7 +428,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	protected function _list_tables($prefix_limit = FALSE)
 	{
-		$sql = 'SHOW TABLES FROM '.$this->_escape_char.$this->database.$this->_escape_char;
+		$sql = 'SHOW TABLES FROM '.$this->escape_identifiers($this->database);
 
 		if ($prefix_limit !== FALSE && $this->dbprefix !== '')
 		{
