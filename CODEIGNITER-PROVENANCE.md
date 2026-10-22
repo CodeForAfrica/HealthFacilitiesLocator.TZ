@@ -1,0 +1,2 @@
+CodeIgniter system/ comes from https://github.com/pocketarc/codeigniter commit 795dc3f0411f2101f3b624f71cb19937efd90f37 (3.4.5). Copyright and MIT license retained in CODEIGNITER-LICENSE.txt and source headers. This maintenance fork supplies PHP8.3 compatibility. The private deployed application, configuration, storage and database remain separate. Review fork upgrade_320.rst for changed DB connection failure handling and removed legacy global input sanitization.
+One whitespace-only cleanup removes upstream trailing whitespace in system/helpers/text_helper.php:426.

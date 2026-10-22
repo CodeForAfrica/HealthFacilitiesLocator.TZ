@@ -50,6 +50,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class CI_Javascript {
 
 	/**
+	 * CI Singleton
+	 *
+	 * @var	object
+	 */
+	protected $CI;
+
+	/**
+	 * JavaScript library driver instance
+	 *
+	 * @var	object
+	 */
+	public $js;
+
+	/**
 	 * JavaScript location
 	 *
 	 * @var	string
@@ -650,11 +664,11 @@ class CI_Javascript {
 			$this->_javascript_location = $this->CI->config->item('javascript_location');
 		}
 
-		if ($relative === TRUE OR strpos($external_file, 'http://') === 0 OR strpos($external_file, 'https://') === 0)
+		if ($relative === TRUE OR stripos($external_file, 'http://') === 0 OR stripos($external_file, 'https://') === 0)
 		{
 			$str = $this->_open_script($external_file);
 		}
-		elseif (strpos($this->_javascript_location, 'http://') !== FALSE)
+		elseif (stripos($this->_javascript_location, 'http://') !== FALSE)
 		{
 			$str = $this->_open_script($this->_javascript_location.$external_file);
 		}
