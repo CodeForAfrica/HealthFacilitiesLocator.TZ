@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Image_lib
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/image_lib.html
+ * @link		https://codeigniter.com/user_guide/libraries/image_lib.html
  */
 class CI_Image_lib {
 
@@ -563,11 +562,11 @@ class CI_Image_lib {
 		 */
 		if ($this->new_image === '')
 		{
-			$this->dest_image  = $this->source_image;
+			$this->dest_image = $this->source_image;
 			$this->dest_folder = $this->source_folder;
 		}
 		elseif (strpos($this->new_image, '/') === FALSE && strpos($this->new_image, '\\') === FALSE)
-		{
+			{
 			$this->dest_image  = $this->new_image;
 			$this->dest_folder = $this->source_folder;
 		}
@@ -576,13 +575,13 @@ class CI_Image_lib {
 			// Is there a file name?
 			if ( ! preg_match('#\.(jpg|jpeg|gif|png)$#i', $this->new_image))
 			{
-				$this->dest_image  = $this->source_image;
+				$this->dest_image = $this->source_image;
 				$this->dest_folder = $this->new_image;
 			}
 			else
 			{
 				$x = explode('/', str_replace('\\', '/', $this->new_image));
-				$this->dest_image  = end($x);
+				$this->dest_image = end($x);
 				$this->dest_folder = str_replace($this->dest_image, '', $this->new_image);
 			}
 
@@ -844,7 +843,7 @@ class CI_Image_lib {
 		if (PHP_VERSION_ID < 80000)
 		{
 			imagedestroy($dst_img);
-			imagedestroy($src_img);
+		imagedestroy($src_img);
 		}
 
 		if ($this->dynamic_output !== TRUE)
@@ -1056,7 +1055,7 @@ class CI_Image_lib {
 		if (PHP_VERSION_ID < 80000)
 		{
 			imagedestroy($dst_img);
-			imagedestroy($src_img);
+		imagedestroy($src_img);
 		}
 
 		chmod($this->full_dst_path, $this->file_permissions);
@@ -1271,7 +1270,7 @@ class CI_Image_lib {
 		if (PHP_VERSION_ID < 80000)
 		{
 			imagedestroy($src_img);
-			imagedestroy($wm_img);
+		imagedestroy($wm_img);
 		}
 
 		return TRUE;
@@ -1724,19 +1723,19 @@ class CI_Image_lib {
 		if ($return === TRUE)
 		{
 			return array(
-				'width'      => $vals[0],
-				'height'     => $vals[1],
-				'image_type' => $vals[2],
-				'size_str'   => $vals[3],
-				'mime_type'  => $mime
-			);
+					'width' =>	$vals[0],
+					'height' =>	$vals[1],
+					'image_type' =>	$vals[2],
+					'size_str' =>	$vals[3],
+					'mime_type' =>	$mime
+				);
 		}
 
-		$this->orig_width  = $vals[0];
-		$this->orig_height = $vals[1];
-		$this->image_type  = $vals[2];
-		$this->size_str    = $vals[3];
-		$this->mime_type   = $mime;
+		$this->orig_width	= $vals[0];
+		$this->orig_height	= $vals[1];
+		$this->image_type	= $vals[2];
+		$this->size_str		= $vals[3];
+		$this->mime_type	= $mime;
 
 		return TRUE;
 	}

@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -47,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Libraries
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/email.html
+ * @link		https://codeigniter.com/user_guide/libraries/email.html
  */
 class CI_Email {
 
@@ -175,7 +174,7 @@ class CI_Email {
 	 * Newline character sequence.
 	 * Use "\r\n" to comply with RFC 822.
 	 *
-	 * @link	https://www.ietf.org/rfc/rfc822.txt
+	 * @link	http://www.ietf.org/rfc/rfc822.txt
 	 * @var	string	"\r\n" or "\n"
 	 */
 	public $newline		= "\n";			// Default newline. "\r\n" or "\n" (Use "\r\n" to comply with RFC 822)
@@ -189,7 +188,7 @@ class CI_Email {
 	 * switching to "\n", while improper, is the only solution
 	 * that seems to work for all environments.
 	 *
-	 * @link	https://www.ietf.org/rfc/rfc822.txt
+	 * @link	http://www.ietf.org/rfc/rfc822.txt
 	 * @var	string
 	 */
 	public $crlf		= "\n";
@@ -223,8 +222,6 @@ class CI_Email {
 	 * @var	int
 	 */
 	public $bcc_batch_size	= 200;
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Subject header
@@ -369,7 +366,7 @@ class CI_Email {
 	);
 
 	/**
-	 * mbstring.func_overload flag
+	 * mbstring.func_override flag
 	 *
 	 * @var	bool
 	 */
@@ -450,7 +447,6 @@ class CI_Email {
 		$this->_bcc_array	= array();
 		$this->_headers		= array();
 		$this->_debug_msg	= array();
-
 		$this->set_header('Date', $this->_set_date());
 
 		if ($clear_attachments !== FALSE)
@@ -894,6 +890,7 @@ class CI_Email {
 	/**
 	 * Get Mail Protocol
 	 *
+	 * @param	bool
 	 * @return	mixed
 	 */
 	protected function _get_protocol()
@@ -901,13 +898,14 @@ class CI_Email {
 		$this->protocol = strtolower($this->protocol);
 		in_array($this->protocol, $this->_protocols, TRUE) OR $this->protocol = 'mail';
 		return $this->protocol;
-	}
+		}
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Get Mail Encoding
 	 *
+	 * @param	bool
 	 * @return	string
 	 */
 	protected function _get_encoding()
@@ -1020,8 +1018,8 @@ class CI_Email {
 				: idn_to_ascii($matches[2]);
 
 			if ($domain !== FALSE)
-			{
-				$email = $matches[1].'@'.$domain;
+		{
+			$email = $matches[1].'@'.$domain;
 			}
 		}
 
@@ -1241,7 +1239,7 @@ class CI_Email {
 	/**
 	 * Build Final Body and attachments
 	 *
-	 * @return	void
+	 * @return	bool
 	 */
 	protected function _build_message()
 	{
@@ -1468,7 +1466,7 @@ class CI_Email {
 	 * Prep Quoted Printable
 	 *
 	 * Prepares string for Quoted-Printable Content-Transfer-Encoding
-	 * Refer to RFC 2045 https://www.ietf.org/rfc/rfc2045.txt
+	 * Refer to RFC 2045 http://www.ietf.org/rfc/rfc2045.txt
 	 *
 	 * @param	string
 	 * @return	string
@@ -1477,7 +1475,7 @@ class CI_Email {
 	{
 		// ASCII code numbers for "safe" characters that can always be
 		// used literally, without encoding, as described in RFC 2049.
-		// https://www.ietf.org/rfc/rfc2049.txt
+		// http://www.ietf.org/rfc/rfc2049.txt
 		static $ascii_safe_chars = array(
 			// ' (  )   +   ,   -   .   /   :   =   ?
 			39, 40, 41, 43, 44, 45, 46, 47, 58, 61, 63,
@@ -1893,9 +1891,12 @@ class CI_Email {
 		}
 
 		// is popen() enabled?
-		if ( ! function_usable('popen')	OR FALSE === ($fp = @popen($this->mailpath.' -oi '.$from.' -t', 'w')))
+		if ( ! function_usable('popen')
+			OR FALSE === ($fp = @popen(
+						$this->mailpath.' -oi '.$from.' -t'
+						, 'w'))
+		) // server probably has popen disabled, so nothing we can do to get a verbose error.
 		{
-			// server probably has popen disabled, so nothing we can do to get a verbose error.
 			return FALSE;
 		}
 
@@ -1950,20 +1951,20 @@ class CI_Email {
 		}
 
 		foreach ($this->_cc_array as $val)
-		{
-			if ($val !== '' && ! $this->_send_command('to', $val))
 			{
-				$this->_smtp_end();
-				return FALSE;
+				if ($val !== '' && ! $this->_send_command('to', $val))
+				{
+					$this->_smtp_end();
+					return FALSE;
+				}
 			}
-		}
 
 		foreach ($this->_bcc_array as $val)
-		{
-			if ($val !== '' && ! $this->_send_command('to', $val))
 			{
-				$this->_smtp_end();
-				return FALSE;
+				if ($val !== '' && ! $this->_send_command('to', $val))
+				{
+					$this->_smtp_end();
+					return FALSE;
 			}
 		}
 
@@ -1977,6 +1978,7 @@ class CI_Email {
 		$this->_send_data($this->_header_str.preg_replace('/^\./m', '..$1', $this->_finalbody));
 
 		$this->_send_data('.');
+
 		$reply = $this->_get_smtp_data();
 		$this->_set_error_message($reply);
 
@@ -2021,13 +2023,11 @@ class CI_Email {
 
 		$ssl = ($this->smtp_crypto === 'ssl') ? 'ssl://' : '';
 
-		$this->_smtp_connect = fsockopen(
-			$ssl.$this->smtp_host,
-			$this->smtp_port,
-			$errno,
-			$errstr,
-			$this->smtp_timeout
-		);
+		$this->_smtp_connect = fsockopen($ssl.$this->smtp_host,
+							$this->smtp_port,
+							$errno,
+							$errstr,
+							$this->smtp_timeout);
 
 		if ( ! is_resource($this->_smtp_connect))
 		{
@@ -2080,49 +2080,57 @@ class CI_Email {
 	{
 		switch ($cmd)
 		{
-			case 'hello':
-				if ($this->_smtp_auth OR $this->_get_encoding() === '8bit')
-				{
-					$this->_send_data('EHLO '.$this->_get_hostname());
-				}
-				else
-				{
-					$this->_send_data('HELO '.$this->_get_hostname());
-				}
+			case 'hello' :
 
-				$resp = 250;
-				break;
-			case 'starttls':
-				$this->_send_data('STARTTLS');
-				$resp = 220;
-				break;
-			case 'from':
-				$this->_send_data('MAIL FROM:<'.$data.'>');
-				$resp = 250;
-				break;
-			case 'to':
-				if ($this->dsn)
-				{
-					$this->_send_data('RCPT TO:<'.$data.'> NOTIFY=SUCCESS,DELAY,FAILURE ORCPT=rfc822;'.$data);
-				}
-				else
-				{
-					$this->_send_data('RCPT TO:<'.$data.'>');
-				}
-				$resp = 250;
-				break;
-			case 'data':
-				$this->_send_data('DATA');
-				$resp = 354;
-				break;
+						if ($this->_smtp_auth OR $this->_get_encoding() === '8bit')
+						{
+							$this->_send_data('EHLO '.$this->_get_hostname());
+						}
+						else
+						{
+							$this->_send_data('HELO '.$this->_get_hostname());
+						}
+
+						$resp = 250;
+			break;
+			case 'starttls'	:
+
+						$this->_send_data('STARTTLS');
+						$resp = 220;
+			break;
+			case 'from' :
+
+						$this->_send_data('MAIL FROM:<'.$data.'>');
+						$resp = 250;
+			break;
+			case 'to' :
+
+						if ($this->dsn)
+						{
+							$this->_send_data('RCPT TO:<'.$data.'> NOTIFY=SUCCESS,DELAY,FAILURE ORCPT=rfc822;'.$data);
+						}
+						else
+						{
+							$this->_send_data('RCPT TO:<'.$data.'>');
+						}
+
+						$resp = 250;
+			break;
+			case 'data'	:
+
+						$this->_send_data('DATA');
+						$resp = 354;
+			break;
 			case 'reset':
-				$this->_send_data('RSET');
-				$resp = 250;
-				break;
-			case 'quit':
-				$this->_send_data('QUIT');
-				$resp = 221;
-				break;
+
+						$this->_send_data('RSET');
+						$resp = 250;
+			break;
+			case 'quit'	:
+
+						$this->_send_data('QUIT');
+						$resp = 221;
+			break;
 		}
 
 		$reply = $this->_get_smtp_data();
@@ -2164,6 +2172,7 @@ class CI_Email {
 		}
 
 		$this->_send_data('AUTH LOGIN');
+
 		$reply = $this->_get_smtp_data();
 
 		if (strpos($reply, '503') === 0)	// Already authenticated
@@ -2177,6 +2186,7 @@ class CI_Email {
 		}
 
 		$this->_send_data(base64_encode($this->smtp_user));
+
 		$reply = $this->_get_smtp_data();
 
 		if (strpos($reply, '334') !== 0)
@@ -2186,6 +2196,7 @@ class CI_Email {
 		}
 
 		$this->_send_data(base64_encode($this->smtp_pass));
+
 		$reply = $this->_get_smtp_data();
 
 		if (strpos($reply, '235') !== 0)
@@ -2219,7 +2230,7 @@ class CI_Email {
 			{
 				break;
 			}
-			// See https://bugs.php.net/bug.php?id=39598 and https://secure.php.net/manual/en/function.fwrite.php#96951
+			// See https://bugs.php.net/bug.php?id=39598 and http://php.net/manual/en/function.fwrite.php#96951
 			elseif ($result === 0)
 			{
 				if ($timestamp === 0)
@@ -2282,7 +2293,7 @@ class CI_Email {
 	 * (eg: "[1.2.3.4]").
 	 *
 	 * @link	https://tools.ietf.org/html/rfc5321#section-2.3.5
-	 * @link	https://cbl.abuseat.org/namingproblems.html
+	 * @link	http://cbl.abuseat.org/namingproblems.html
 	 * @return	string
 	 */
 	protected function _get_hostname()
@@ -2312,7 +2323,7 @@ class CI_Email {
 		$raw_data = '';
 		is_array($include) OR $include = array($include);
 
-		in_array('headers', $include, TRUE) && $raw_data  = htmlspecialchars($this->_header_str)."\n";
+		in_array('headers', $include, TRUE) && $raw_data = htmlspecialchars($this->_header_str)."\n";
 		in_array('subject', $include, TRUE) && $raw_data .= htmlspecialchars($this->_subject)."\n";
 		in_array('body', $include, TRUE)    && $raw_data .= htmlspecialchars($this->_finalbody);
 

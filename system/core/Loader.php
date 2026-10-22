@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -47,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Loader
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/loader.html
+ * @link		https://codeigniter.com/user_guide/libraries/loader.html
  */
 #[AllowDynamicProperties]
 class CI_Loader {
@@ -191,7 +190,7 @@ class CI_Loader {
 	 * Loads and instantiates libraries.
 	 * Designed to be called from application controllers.
 	 *
-	 * @param	mixed	$library	Library name
+	 * @param	string	$library	Library name
 	 * @param	array	$params		Optional parameters to pass to the library class constructor
 	 * @param	string	$object_name	An optional object name to assign to
 	 * @return	object
@@ -235,7 +234,7 @@ class CI_Loader {
 	 *
 	 * Loads and instantiates models.
 	 *
-	 * @param	mixed	$model		Model name
+	 * @param	string	$model		Model name
 	 * @param	string	$name		An optional object name to assign to
 	 * @param	bool	$db_conn	An optional database connection configuration to initialize
 	 * @return	object
@@ -377,6 +376,9 @@ class CI_Loader {
 	 *
 	 * @param	mixed	$params		Database configuration options
 	 * @param	bool	$return 	Whether to return the database object
+	 * @param	bool	$query_builder	Whether to enable Query Builder
+	 *					(overrides the configuration setting)
+	 *
 	 * @return	object|bool	Database object if $return is set to TRUE,
 	 *					FALSE on failure, CI_Loader instance in any other case
 	 */
@@ -550,8 +552,8 @@ class CI_Loader {
 			: $this->_ci_prepare_view_vars($vars);
 
 		foreach ($vars as $key => $val)
-		{
-			$this->_ci_cached_vars[$key] = $val;
+			{
+				$this->_ci_cached_vars[$key] = $val;
 		}
 
 		return $this;
@@ -953,19 +955,12 @@ class CI_Loader {
 		}
 
 		/*
-		 * Extract and stack variables
+		 * Extract and cache variables
 		 *
 		 * You can either set variables using the dedicated $this->load->vars()
 		 * function or via the second parameter of this function. We'll merge
-		 * the two types so that loaded views and files have access to these
-		 * variables.
-		 * Additionally we want all subsequent nested _ci_load() calls embedded
-		 * within the current file to 'inherit' all variables that are
-		 * accessible to the current file. For this purpose we push the current
-		 * variable configuration (_ci_vars) to the stack and remove it again
-		 * after the file or view is completely loaded. Nested _ci_load() calls
-		 * within the current file extend the stack with their variable
-		 * configuration.
+		 * the two types and cache them so that views that are embedded within
+		 * other views can have access to these variables.
 		 */
 
 		is_array($_ci_vars) OR $_ci_vars = array();
@@ -984,7 +979,7 @@ class CI_Loader {
 		array_push($this->_ci_load_vars_stack, $_ci_vars);
 		extract($_ci_vars);
 
-		/**
+		/*
 		 * Buffer the output
 		 *
 		 * We buffer the output for two reasons:
@@ -1106,7 +1101,8 @@ class CI_Loader {
 			}
 
 			$filepath = $path.'libraries/'.$subdir.$class.'.php';
-			// Does the file exist? No? Bummer...
+
+			// Safety: Was the class already loaded by a previous call?
 			if ( ! file_exists($filepath))
 			{
 				continue;
@@ -1160,9 +1156,9 @@ class CI_Loader {
 			}
 
 			$CI =& get_instance();
-			if ( ! isset($CI->$property))
-			{
-				return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
+				if ( ! isset($CI->$property))
+				{
+					return $this->_ci_init_library($library_name, $prefix, $params, $object_name);
 			}
 
 			log_message('debug', $library_name.' class already loaded. Second attempt ignored.');
@@ -1402,21 +1398,19 @@ class CI_Loader {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Prepare variables for _ci_vars, to be later extract()-ed inside views
+	 * CI Object to Array translator
 	 *
-	 * Converts objects to associative arrays and filters-out internal
-	 * variable names (i.e. keys prefixed with '_ci_').
+	 * Takes an object as input and converts the class variables to
+	 * an associative array with key/value pairs.
 	 *
-	 * @param	mixed	$vars
+	 * @param	object	$object	Object data to translate
 	 * @return	array
 	 */
 	protected function _ci_prepare_view_vars($vars)
 	{
 		if ( ! is_array($vars))
 		{
-			$vars = is_object($vars)
-				? get_object_vars($vars)
-				: array();
+			$vars = is_object($vars) ? get_object_vars($vars) : array();
 		}
 
 		foreach (array_keys($vars) as $key)

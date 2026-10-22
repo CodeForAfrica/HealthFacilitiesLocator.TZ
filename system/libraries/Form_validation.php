@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Validation
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/form_validation.html
+ * @link		https://codeigniter.com/user_guide/libraries/form_validation.html
  */
 class CI_Form_validation {
 
@@ -106,9 +105,8 @@ class CI_Form_validation {
 	protected $error_string		= '';
 
 	/**
-	 * Whether the form data has been through validation and had errors
+	 * Whether the form data has been validated as safe
 	 *
-	 * @deprecated	3.0.6
 	 * @var bool
 	 */
 	protected $_safe_form_data	= FALSE;
@@ -416,8 +414,7 @@ class CI_Form_validation {
 	 *
 	 * This function does all the work.
 	 *
-	 * @param	string	$config
-	 * @param	array	$data
+	 * @param	string	$group
 	 * @return	bool
 	 */
 	public function run($config = NULL, &$data = NULL)
@@ -500,7 +497,9 @@ class CI_Form_validation {
 			return TRUE;
 		}
 
+		// Now we need to re-set the POST data with the new, processed data
 		empty($this->validation_data) && $this->_reset_data_array($_POST);
+
 		return TRUE;
 	}
 
@@ -1219,8 +1218,9 @@ class CI_Form_validation {
 			$str = $matches[2];
 		}
 
-		// Apparently, FILTER_VALIDATE_URL doesn't reject digit-only names for some reason ...
-		// See https://github.com/bcit-ci/CodeIgniter/issues/5755
+		// PHP 7 accepts IPv6 addresses within square brackets as hostnames,
+		// but it appears that the PR that came in with https://bugs.php.net/bug.php?id=68039
+		// was never merged into a PHP 5 branch ... https://3v4l.org/8PsSN
 		if (ctype_digit($str))
 		{
 			return FALSE;
@@ -1254,8 +1254,8 @@ class CI_Form_validation {
 				: idn_to_ascii($matches[2]);
 
 			if ($domain !== FALSE)
-			{
-				$str = $matches[1].'@'.$domain;
+		{
+			$str = $matches[1].'@'.$domain;
 			}
 		}
 

@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -42,7 +41,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Zip Compression Class
  *
  * This class is based on a library I found at Zend:
- * https://www.zend.com/codex.php?id=696&single=1
+ * http://www.zend.com/codex.php?id=696&single=1
  *
  * The original library is a little rough around the edges so I
  * refactored it and added several additional methods -- Rick Ellis
@@ -51,7 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Encryption
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/zip.html
+ * @link		https://codeigniter.com/user_guide/libraries/zip.html
  */
 class CI_Zip {
 
@@ -107,7 +106,7 @@ class CI_Zip {
 	public $compression_level = 2;
 
 	/**
-	 * mbstring.func_overload flag
+	 * mbstring.func_override flag
 	 *
 	 * @var	bool
 	 */
@@ -414,7 +413,7 @@ class CI_Zip {
 			.pack('V', self::strlen($this->directory)) // size of central dir
 			.pack('V', self::strlen($this->zipdata)) // offset to start of central dir
 			."\x00\x00"; // .zip file comment length
-		return $this->zipdata.$footer;
+		return $this->zipdata.$footer; // .zip file comment length
 	}
 
 	// --------------------------------------------------------------------

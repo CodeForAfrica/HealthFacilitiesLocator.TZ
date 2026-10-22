@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -52,7 +51,7 @@ if ( ! function_exists('xml_parser_create'))
  * @subpackage	Libraries
  * @category	XML-RPC
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/xmlrpc.html
+ * @link		https://codeigniter.com/user_guide/libraries/xmlrpc.html
  */
 class CI_Xmlrpc {
 
@@ -239,7 +238,7 @@ class CI_Xmlrpc {
 	public $result;
 
 	/**
-	 * XML-RPC Response
+	 * XML-RPC Reponse
 	 *
 	 * @var	array
 	 */
@@ -560,7 +559,7 @@ class CI_Xmlrpc {
  *
  * @category	XML-RPC
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/xmlrpc.html
+ * @link		https://codeigniter.com/user_guide/libraries/xmlrpc.html
  */
 class XML_RPC_Client extends CI_Xmlrpc
 {
@@ -744,7 +743,7 @@ class XML_RPC_Client extends CI_Xmlrpc
 			{
 				break;
 			}
-			// See https://bugs.php.net/bug.php?id=39598 and https://secure.php.net/manual/en/function.fwrite.php#96951
+			// See https://bugs.php.net/bug.php?id=39598 and http://php.net/manual/en/function.fwrite.php#96951
 			elseif ($result === 0)
 			{
 				if ($timestamp === 0)
@@ -781,7 +780,7 @@ class XML_RPC_Client extends CI_Xmlrpc
  *
  * @category	XML-RPC
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/xmlrpc.html
+ * @link		https://codeigniter.com/user_guide/libraries/xmlrpc.html
  */
 class XML_RPC_Response
 {
@@ -837,7 +836,8 @@ class XML_RPC_Response
 		{
 			// error
 			$this->errno = $code;
-			$this->errstr = htmlspecialchars($fstr, ENT_XML1 | ENT_NOQUOTES, 'UTF-8');
+			$this->errstr = htmlspecialchars($fstr, ENT_XML1 | ENT_NOQUOTES,
+							'UTF-8');
 		}
 		elseif ( ! is_object($val))
 		{
@@ -996,7 +996,6 @@ class XML_RPC_Response
 			{
 				$arr[$key] = $this->xmlrpc_decoder($value);
 			}
-
 			return $arr;
 		}
 	}
@@ -1029,7 +1028,7 @@ class XML_RPC_Response
  *
  * @category	XML-RPC
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/xmlrpc.html
+ * @link		https://codeigniter.com/user_guide/libraries/xmlrpc.html
  */
 class XML_RPC_Message extends CI_Xmlrpc
 {
@@ -1647,7 +1646,7 @@ class XML_RPC_Message extends CI_Xmlrpc
  *
  * @category	XML-RPC
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/xmlrpc.html
+ * @link		https://codeigniter.com/user_guide/libraries/xmlrpc.html
  */
 class XML_RPC_Values extends CI_Xmlrpc
 {
@@ -1909,7 +1908,7 @@ class XML_RPC_Values extends CI_Xmlrpc
 	 * @param	int	unix timestamp
 	 * @param	bool
 	 * @return	string
-	 */
+	*/
 	public function iso8601_encode($time, $utc = FALSE)
 	{
 		return ($utc) ? date('Ymd\TH:i:s', $time) : gmdate('Ymd\TH:i:s', $time);

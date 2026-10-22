@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Helpers
  * @category	Helpers
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/helpers/captcha_helper.html
+ * @link		https://codeigniter.com/user_guide/helpers/captcha_helper.html
  */
 
 // ------------------------------------------------------------------------
@@ -55,8 +54,11 @@ if ( ! function_exists('create_captcha'))
 	/**
 	 * Create CAPTCHA
 	 *
-	 * @param	array	$data	Data for the CAPTCHA
-	 * @return	array
+	 * @param	array	$data		data for the CAPTCHA
+	 * @param	string	$img_path	path to create the image in
+	 * @param	string	$img_url	URL to the CAPTCHA image folder
+	 * @param	string	$font_path	server path to font
+	 * @return	string
 	 */
 	function create_captcha($data)
 	{
@@ -132,15 +134,16 @@ if ( ! function_exists('create_captcha'))
 			 * Remove old images
 			 */
 			$current_dir = @opendir($img_path);
-			while ($filename = @readdir($current_dir))
+		while ($filename = @readdir($current_dir))
+		{
+			if (preg_match('#^(?<ts>\d{10})\.png$#', $filename, $match)
+				&& ($match['ts'] + $expiration) < $now)
 			{
-				if (preg_match('#^(?<ts>\d{10})\.png$#', $filename, $match) && ($match['ts'] + $expiration) < $now)
-				{
-					@unlink($img_path.$filename);
-				}
+				@unlink($img_path.$filename);
 			}
+		}
 
-			@closedir($current_dir);
+		@closedir($current_dir);
 
 			// This variable will later be used later to determine whether we write to disk or output a data:image URI
 			$img_filename = $now.'.png';
@@ -258,8 +261,8 @@ if ( ! function_exists('create_captcha'))
 		// Determine angle and position
 		// -----------------------------------
 		$length	= strlen($word);
-		$angle	= ($length >= 6) ? mt_rand(-($length - 6), ($length - 6)) : 0;
-		$x_axis	= mt_rand(6, (int) ((360 / $length) - 16));
+		$angle	= ($length >= 6) ? mt_rand(-($length-6), ($length-6)) : 0;
+		$x_axis	= mt_rand(6, (int) ((360/$length)-16));
 		$y_axis = ($angle >= 0) ? mt_rand((int) $img_height, (int) $img_width) : mt_rand(6, (int) $img_height);
 
 		// Create image
@@ -329,7 +332,7 @@ if ( ! function_exists('create_captcha'))
 		{
 			if ($use_font === FALSE)
 			{
-				$y = mt_rand(0, (int) ($img_height / 2));
+				$y = mt_rand(0 , (int) ($img_height / 2));
 				imagestring($im, $font_size, $x, $y, $word[$i], $colors['text']);
 				$x += ($font_size * 2);
 			}
@@ -365,7 +368,7 @@ if ( ! function_exists('create_captcha'))
 			while (strlen($read = fread($buffer, 4096)))
 			{
 				$img_src .= $read;
-			}
+		}
 
 			fclose($buffer);
 			$img_src = 'data:image/png;base64,'.base64_encode($img_src);

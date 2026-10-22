@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 2.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Sessions
  * @author		Andrey Andreev
- * @link		https://codeigniter.com/userguide3/libraries/sessions.html
+ * @link		https://codeigniter.com/user_guide/libraries/sessions.html
  */
 class CI_Session {
 
@@ -103,24 +102,24 @@ class CI_Session {
 		$this->_configure($params);
 		$this->_config['_sid_regexp'] = $this->_sid_regexp;
 
-		$class   = new $class($this->_config);
+		$class = new $class($this->_config);
 		$wrapper = new CI_SessionWrapper($class);
 		if (is_php('5.4'))
-		{
-			session_set_save_handler($wrapper, TRUE);
-		}
-		else
-		{
-			session_set_save_handler(
-				array($wrapper, 'open'),
-				array($wrapper, 'close'),
-				array($wrapper, 'read'),
-				array($wrapper, 'write'),
-				array($wrapper, 'destroy'),
-				array($wrapper, 'gc')
-			);
+			{
+				session_set_save_handler($wrapper, TRUE);
+			}
+			else
+			{
+				session_set_save_handler(
+					array($wrapper, 'open'),
+					array($wrapper, 'close'),
+					array($wrapper, 'read'),
+					array($wrapper, 'write'),
+					array($wrapper, 'destroy'),
+					array($wrapper, 'gc')
+				);
 
-			register_shutdown_function('session_write_close');
+				register_shutdown_function('session_write_close');
 		}
 
 		// Sanitize the cookie, because apparently PHP doesn't do that for userspace handlers
@@ -205,7 +204,7 @@ class CI_Session {
 	 */
 	protected function _ci_load_classes($driver)
 	{
-		// PHP 7 compatibility
+		// PHP 5.4 compatibility
 		interface_exists('SessionUpdateTimestampHandlerInterface', FALSE) OR require_once(BASEPATH.'libraries/Session/SessionUpdateTimestampHandlerInterface.php');
 
 		require_once(BASEPATH.'libraries/Session/CI_Session_driver_interface.php');
@@ -335,12 +334,12 @@ class CI_Session {
 		else
 		{
 			session_set_cookie_params(
-				$params['cookie_lifetime'],
-				$params['cookie_path'].'; SameSite='.$params['cookie_samesite'],
-				$params['cookie_domain'],
-				$params['cookie_secure'],
-				TRUE // HttpOnly; Yes, this is intentional and not configurable for security reasons
-			);
+			$params['cookie_lifetime'],
+			$params['cookie_path'].'; SameSite='.$params['cookie_samesite'],
+			$params['cookie_domain'],
+			$params['cookie_secure'],
+			TRUE // HttpOnly; Yes, this is intentional and not configurable for security reasons
+		);
 		}
 
 		if (empty($expiration))
@@ -464,6 +463,8 @@ class CI_Session {
 				{
 					$_SESSION['__ci_vars'][$key] = 'old';
 				}
+				// Hacky, but 'old' will (implicitly) always be less than time() ;)
+				// DO NOT move this above the 'new' check!
 				elseif ($value === 'old' || $value < $current_time)
 				{
 					unset($_SESSION[$key], $_SESSION['__ci_vars'][$key]);
@@ -651,7 +652,7 @@ class CI_Session {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Unmark temp
+	 * Unmark flash
 	 *
 	 * @param	mixed	$key	Session data key(s)
 	 * @return	void
@@ -772,7 +773,7 @@ class CI_Session {
 	 *
 	 * Legacy CI_Session compatibility method
 	 *
-	 * @return	array
+	 * @returns	array
 	 */
 	public function &get_userdata()
 	{

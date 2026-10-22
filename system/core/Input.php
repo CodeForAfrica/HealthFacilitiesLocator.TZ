@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -47,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Input
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/input.html
+ * @link		https://codeigniter.com/user_guide/libraries/input.html
  */
 class CI_Input {
 
@@ -59,9 +58,11 @@ class CI_Input {
 	protected $ip_address = FALSE;
 
 	/**
-	 * List of all HTTP request headers
+	 * Allow GET array flag
 	 *
-	 * @var array
+	 * If set to FALSE, then $_GET will be set to an empty array.
+	 *
+	 * @var	bool
 	 */
 	protected $headers = array();
 
@@ -84,14 +85,6 @@ class CI_Input {
 	 */
 	protected $_input_stream;
 
-	/**
-	 * CI_Security instance
-	 *
-	 * Used for the optional $xss_filter parameter that most
-	 * getter methods have here.
-	 *
-	 * @var	CI_Security
-	 */
 	protected $security;
 
 	// --------------------------------------------------------------------
@@ -105,8 +98,8 @@ class CI_Input {
 	 * @return	void
 	 */
 	public function __construct(CI_Security &$security)
-	{
-		$this->security = $security;
+		{
+			$this->security = $security;
 		log_message('info', 'Input Class Initialized');
 	}
 
@@ -301,7 +294,6 @@ class CI_Input {
 	 * @param	string		$prefix		Cookie name prefix
 	 * @param	bool		$secure		Whether to only transfer cookies via SSL
 	 * @param	bool		$httponly	Whether to only makes the cookie accessible via HTTP (no javascript)
-	 * @param	string		$samesite	SameSite attribute
 	 * @return	void
 	 */
 	public function set_cookie($name, $value = '', $expire = 0, $domain = '', $path = '/', $prefix = '', $secure = NULL, $httponly = NULL, $samesite = NULL)
@@ -668,7 +660,6 @@ class CI_Input {
 	 * Test to see if a request was made from the command line.
 	 *
 	 * @deprecated	3.0.0	Use is_cli() instead
-	 * @see		is_cli()
 	 * @return	bool
 	 */
 	public function is_cli_request()

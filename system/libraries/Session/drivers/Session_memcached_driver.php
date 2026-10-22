@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 3.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Sessions
  * @author	Andrey Andreev
- * @link	https://codeigniter.com/userguide3/libraries/sessions.html
+ * @link	https://codeigniter.com/user_guide/libraries/sessions.html
  */
 class CI_Session_memcached_driver extends CI_Session_driver implements CI_Session_driver_interface {
 
@@ -207,24 +206,24 @@ class CI_Session_memcached_driver extends CI_Session_driver implements CI_Sessio
 
 		$key = $this->_key_prefix.$session_id;
 
-		$this->_memcached->replace($this->_lock_key, time(), 300);
-		if ($this->_fingerprint !== ($fingerprint = md5($session_data)))
-		{
-			if ($this->_memcached->set($key, $session_data, $this->_config['expiration']))
+			$this->_memcached->replace($this->_lock_key, time(), 300);
+			if ($this->_fingerprint !== ($fingerprint = md5($session_data)))
 			{
-				$this->_fingerprint = $fingerprint;
+				if ($this->_memcached->set($key, $session_data, $this->_config['expiration']))
+				{
+					$this->_fingerprint = $fingerprint;
+					return $this->_success;
+				}
+
+				return $this->_failure;
+			}
+			elseif (
+				$this->_memcached->touch($key, $this->_config['expiration'])
+				OR ($this->_memcached->getResultCode() === Memcached::RES_NOTFOUND && $this->_memcached->set($key, $session_data, $this->_config['expiration']))
+			)
+			{
 				return $this->_success;
 			}
-
-			return $this->_failure;
-		}
-		elseif (
-			$this->_memcached->touch($key, $this->_config['expiration'])
-			OR ($this->_memcached->getResultCode() === Memcached::RES_NOTFOUND && $this->_memcached->set($key, $session_data, $this->_config['expiration']))
-		)
-		{
-			return $this->_success;
-		}
 
 		return $this->_failure;
 	}

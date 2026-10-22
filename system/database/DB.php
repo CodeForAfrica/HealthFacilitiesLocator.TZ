@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -43,9 +42,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * @category	Database
  * @author	EllisLab Dev Team
- * @link	https://codeigniter.com/userguide3/database/
+ * @link	https://codeigniter.com/user_guide/database/
  *
  * @param 	string|string[]	$params
+ * @param 	bool		$query_builder_override
+ *				Determines if query builder should be used or not
  */
 function &DB($params = '')
 {
@@ -150,21 +151,22 @@ function &DB($params = '')
 
 	require_once(BASEPATH.'database/DB_driver.php');
 	require_once(BASEPATH.'database/DB_query_builder.php');
-	if ( ! class_exists('CI_DB', FALSE))
-	{
-		/**
-		 * CI_DB
-		 *
-		 * Acts as an alias for both CI_DB_driver and CI_DB_query_builder.
-		 *
-		 * @see	CI_DB_query_builder
-		 * @see	CI_DB_driver
-		 */
-		class CI_DB extends CI_DB_query_builder {}
+		if ( ! class_exists('CI_DB', FALSE))
+		{
+			/**
+			 * CI_DB
+			 *
+			 * Acts as an alias for both CI_DB_driver and CI_DB_query_builder.
+			 *
+			 * @see	CI_DB_query_builder
+			 * @see	CI_DB_driver
+			 */
+			class CI_DB extends CI_DB_query_builder { }
 	}
 
 	// Load the DB driver
 	$driver_file = BASEPATH.'database/drivers/'.$params['dbdriver'].'/'.$params['dbdriver'].'_driver.php';
+
 	file_exists($driver_file) OR show_error('Invalid DB driver');
 	require_once($driver_file);
 

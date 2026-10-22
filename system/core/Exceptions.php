@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Exceptions
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/exceptions.html
+ * @link		https://codeigniter.com/user_guide/libraries/exceptions.html
  */
 class CI_Exceptions {
 
@@ -62,19 +61,19 @@ class CI_Exceptions {
 	 * @var	array
 	 */
 	public $levels = array(
-		E_ERROR => 'Error',
+		E_ERROR			=>	'Error',
 		E_RECOVERABLE_ERROR => 'Recoverable Error',
-		E_WARNING => 'Warning',
-		E_PARSE => 'Parsing Error',
-		E_NOTICE => 'Notice',
+		E_WARNING		=>	'Warning',
+		E_PARSE			=>	'Parsing Error',
+		E_NOTICE		=>	'Notice',
 		E_DEPRECATED => 'Deprecated Notice',
-		E_CORE_ERROR => 'Core Error',
-		E_CORE_WARNING => 'Core Warning',
-		E_COMPILE_ERROR => 'Compile Error',
-		E_COMPILE_WARNING => 'Compile Warning',
-		E_USER_ERROR => 'User Error',
-		E_USER_WARNING => 'User Warning',
-		E_USER_NOTICE => 'User Notice',
+		E_CORE_ERROR		=>	'Core Error',
+		E_CORE_WARNING		=>	'Core Warning',
+		E_COMPILE_ERROR		=>	'Compile Error',
+		E_COMPILE_WARNING	=>	'Compile Warning',
+		E_USER_ERROR		=>	'User Error',
+		E_USER_WARNING		=>	'User Warning',
+		E_USER_NOTICE		=>	'User Notice',
 		E_USER_DEPRECATED => 'User Deprecated Notice',
 
 		# 2048 is E_STRICT, but it's deprecated in PHP 8.4.
@@ -247,7 +246,7 @@ class CI_Exceptions {
 	 * @param	string	$message	Error message
 	 * @param	string	$filepath	File path
 	 * @param	int	$line		Line number
-	 * @return	void
+	 * @return	string	Error page output
 	 */
 	public function show_php_error($severity, $message, $filepath, $line)
 	{

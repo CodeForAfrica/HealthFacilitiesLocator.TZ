@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -45,7 +44,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Helpers
  * @category	Helpers
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/helpers/download_helper.html
+ * @link		https://codeigniter.com/user_guide/helpers/download_helper.html
  */
 
 // ------------------------------------------------------------------------
@@ -57,7 +56,7 @@ if ( ! function_exists('force_download'))
 	 *
 	 * Generates headers that force a download to happen
 	 *
-	 * @param	mixed	filename (or an array of local file path => destination filename)
+	 * @param	string	filename
 	 * @param	mixed	the data to be downloaded
 	 * @param	bool	whether to try and send the actual file MIME type
 	 * @return	void
@@ -70,13 +69,12 @@ if ( ! function_exists('force_download'))
 		}
 		elseif ($data === NULL)
 		{
-			// Is $filename an array as ['local source path' => 'destination filename']?
 			if (is_array($filename))
 			{
 				if (count($filename) !== 1)
-				{
-					return;
-				}
+			{
+				return;
+			}
 
 				reset($filename);
 				$filepath = key($filename);
@@ -90,8 +88,8 @@ if ( ! function_exists('force_download'))
 			else
 			{
 				$filepath = $filename;
-				$filename = explode('/', str_replace(DIRECTORY_SEPARATOR, '/', $filename));
-				$filename = end($filename);
+			$filename = explode('/', str_replace(DIRECTORY_SEPARATOR, '/', $filename));
+			$filename = end($filename);
 			}
 
 			if ( ! @is_file($filepath) OR ($filesize = @filesize($filepath)) === FALSE)
@@ -142,7 +140,6 @@ if ( ! function_exists('force_download'))
 			$filename = implode('.', $x);
 		}
 
-		// Clean output buffer
 		if (ob_get_level() !== 0 && @ob_end_clean() === FALSE)
 		{
 			@ob_clean();

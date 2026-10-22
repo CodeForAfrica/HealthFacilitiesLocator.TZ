@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -43,7 +42,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * @category	Database
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/database/
+ * @link		https://codeigniter.com/user_guide/database/
  */
 abstract class CI_DB_forge {
 
@@ -490,7 +489,7 @@ abstract class CI_DB_forge {
 	 *
 	 * @param	string	$table		Table name
 	 * @param	bool	$if_exists	Whether to add an IF EXISTS condition
-	 * @return	mixed	(Returns a platform-specific DROP table string, or TRUE to indicate there's nothing to do)
+	 * @return	string
 	 */
 	protected function _drop_table($table, $if_exists)
 	{
@@ -557,8 +556,10 @@ abstract class CI_DB_forge {
 	/**
 	 * Column Add
 	 *
+	 * @todo	Remove deprecated $_after option in 3.1+
 	 * @param	string	$table	Table name
 	 * @param	array	$field	Column definition
+	 * @param	string	$_after	Column for AFTER clause (deprecated)
 	 * @return	bool
 	 */
 	public function add_column($table, $field, $_after = NULL)
@@ -568,6 +569,7 @@ abstract class CI_DB_forge {
 
 		foreach (array_keys($field) as $k)
 		{
+			// Backwards-compatibility work-around for MySQL/CUBRID AFTER clause (remove in 3.1+)
 			if ($_after !== NULL && is_array($field[$k]) && ! isset($field[$k]['after']))
 			{
 				$field[$k]['after'] = $_after;
@@ -899,12 +901,12 @@ abstract class CI_DB_forge {
 		}
 
 		if ($attributes['DEFAULT'] === NULL)
-		{
-			$field['default'] = empty($this->_null) ? '' : $this->_default.$this->_null;
+			{
+				$field['default'] = empty($this->_null) ? '' : $this->_default.$this->_null;
 
-			// Override the NULL attribute if that's our default
-			$attributes['NULL'] = TRUE;
-			$field['null'] = empty($this->_null) ? '' : ' '.$this->_null;
+				// Override the NULL attribute if that's our default
+				$attributes['NULL'] = TRUE;
+				$field['null'] = empty($this->_null) ? '' : ' '.$this->_null;
 			return;
 		}
 
@@ -990,8 +992,8 @@ abstract class CI_DB_forge {
 	/**
 	 * Process indexes
 	 *
-	 * @param	string	$table	Table name
-	 * @return	string[] list of SQL statements
+	 * @param	string	$table
+	 * @return	string
 	 */
 	protected function _process_indexes($table)
 	{

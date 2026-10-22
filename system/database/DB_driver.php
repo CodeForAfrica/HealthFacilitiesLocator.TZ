@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -49,7 +48,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Drivers
  * @category	Database
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/database/
+ * @link		https://codeigniter.com/user_guide/database/
  */
 #[AllowDynamicProperties]
 abstract class CI_DB_driver {
@@ -382,8 +381,7 @@ abstract class CI_DB_driver {
 	/**
 	 * Initialize Database Settings
 	 *
-	 * @return	void
-	 * @throws	RuntimeException	In case of failure
+	 * @return	bool
 	 */
 	public function initialize()
 	{
@@ -433,7 +431,7 @@ abstract class CI_DB_driver {
 			if ( ! $this->conn_id)
 			{
 				throw new RuntimeException('Unable to connect to the database.');
-			}
+				}
 		}
 	}
 
@@ -685,9 +683,9 @@ abstract class CI_DB_driver {
 			return TRUE;
 		}
 
-		// Instantiate the driver-specific result class
-		$driver	= 'CI_DB_'.$this->dbdriver.'_result';
-		$RES    = new $driver($this);
+		// Load and instantiate the result driver
+		$driver		= 'CI_DB_'.$this->dbdriver.'_result';
+		$RES		= new $driver($this);
 
 		// Is query caching enabled? If so, we'll serialize the
 		// result object and save it to a cache file.
@@ -717,13 +715,9 @@ abstract class CI_DB_driver {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Simple Query
-	 * This is a simplified version of the query() function. Internally
-	 * we only use it when running transaction commands since they do
-	 * not require all the features of the main query() function.
+	 * Load the result drivers
 	 *
-	 * @param	string	the sql query
-	 * @return	mixed
+	 * @return	string	the name of the result class
 	 */
 	public function simple_query($sql)
 	{
@@ -831,8 +825,9 @@ abstract class CI_DB_driver {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Returns TRUE if a transaction is currently active
+	 * Begin Transaction
 	 *
+	 * @param	bool	$test_mode
 	 * @return	bool
 	 */
 	public function trans_active()
@@ -1126,7 +1121,7 @@ abstract class CI_DB_driver {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Platform-dependent string escape
+	 * Platform-dependant string escape
 	 *
 	 * @param	string
 	 * @return	string
@@ -1260,6 +1255,7 @@ abstract class CI_DB_driver {
 	 */
 	public function list_fields($table)
 	{
+		// Is there a cached result?
 		if (FALSE === ($sql = $this->_list_columns($table)))
 		{
 			return ($this->db_debug) ? $this->display_error('db_unsupported_function') : FALSE;
@@ -1329,8 +1325,7 @@ abstract class CI_DB_driver {
 	 *
 	 * This function escapes column and table names
 	 *
-	 * @param	mixed	$item	Identifier to escape
-	 * @param	bool	$split	Whether to split identifiers when a dot is encountered
+	 * @param	mixed
 	 * @return	mixed
 	 */
 	public function escape_identifiers($item, $split = TRUE)
@@ -1519,7 +1514,7 @@ abstract class CI_DB_driver {
 				'\s+EXISTS\s*\(.*\)',        // EXISTS(sql)
 				'\s+NOT EXISTS\s*\(.*\)',    // NOT EXISTS(sql)
 				'\s+BETWEEN\s+',                 // BETWEEN value AND value
-				'\s+NOT BETWEEN\s+',             // NOT BETWEEN value AND value
+				'\s+NOT BETWEEN\s+',                 // BETWEEN value AND value
 				'\s+IN\s*\(.*\)',            // IN(list)
 				'\s+NOT IN\s*\(.*\)',        // NOT IN (list)
 				'\s+LIKE\s+\S.*('.$_les.')?',    // LIKE 'expr'[ ESCAPE '%s']

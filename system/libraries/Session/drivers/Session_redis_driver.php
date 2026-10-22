@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 3.0.0
  * @filesource
@@ -45,14 +44,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Libraries
  * @category	Sessions
  * @author	Andrey Andreev
- * @link	https://codeigniter.com/userguide3/libraries/sessions.html
+ * @link	https://codeigniter.com/user_guide/libraries/sessions.html
  */
 class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_driver_interface {
 
 	/**
 	 * phpRedis instance
 	 *
-	 * @var	Redis
+	 * @var	resource
 	 */
 	protected $_redis;
 
@@ -141,8 +140,8 @@ class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_dr
 		elseif (preg_match('#(?:(?:tcp|tls)://)?([^:?]+)(?:\:(\d+))?(?<options>\?.+)?#', $this->_config['save_path'], $matches))
 		{
 			$save_path = array(
-				'host'    => $matches[1],
-				'port'    => empty($matches[2]) ? NULL : $matches[2],
+				'host' => $matches[1],
+				'port' => empty($matches[2]) ? NULL : $matches[2],
 				'timeout' => 0.0 // We always pass this to Redis::connect(), so it needs to exist
 			);
 		}
@@ -165,8 +164,8 @@ class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_dr
 			$this->_config['save_path'] = $save_path;
 
 			if ($this->_config['match_ip'] === TRUE)
-			{
-				$this->_key_prefix .= $_SERVER['REMOTE_ADDR'].':';
+		{
+			$this->_key_prefix .= $_SERVER['REMOTE_ADDR'].':';
 			}
 		}
 	}
@@ -192,28 +191,24 @@ class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_dr
 		$redis = new Redis();
 		$connected = isset($this->_config['save_path']['path'])
 			? $redis->connect($this->_config['save_path']['path'])
-			: $redis->connect(
-				$this->_config['save_path']['host'],
-				$this->_config['save_path']['port'],
-				$this->_config['save_path']['timeout']
-			);
+			: $redis->connect($this->_config['save_path']['host'], $this->_config['save_path']['port'], $this->_config['save_path']['timeout']);
 
 		if ($connected)
 		{
 			if (isset($this->_config['save_path']['password']) && ! $redis->auth($this->_config['save_path']['password']))
-			{
-				log_message('error', 'Session: Unable to authenticate to Redis instance.');
-			}
-			elseif (isset($this->_config['save_path']['database']) && ! $redis->select($this->_config['save_path']['database']))
-			{
-				log_message('error', 'Session: Unable to select Redis database with index '.$this->_config['save_path']['database']);
-			}
-			else
-			{
-				$this->_redis = $redis;
+		{
+			log_message('error', 'Session: Unable to authenticate to Redis instance.');
+		}
+		elseif (isset($this->_config['save_path']['database']) && ! $redis->select($this->_config['save_path']['database']))
+		{
+			log_message('error', 'Session: Unable to select Redis database with index '.$this->_config['save_path']['database']);
+		}
+		else
+		{
+			$this->_redis = $redis;
 				$this->php5_validate_id();
 				return $this->_success;
-			}
+		}
 		}
 		else
 		{
@@ -283,21 +278,21 @@ class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_dr
 		}
 
 		$this->_redis->{$this->_setTimeout_name}($this->_lock_key, 300);
-		if ($this->_fingerprint !== ($fingerprint = md5($session_data)) OR $this->_key_exists === FALSE)
-		{
-			if ($this->_redis->set($this->_key_prefix.$session_id, $session_data, $this->_config['expiration']))
+			if ($this->_fingerprint !== ($fingerprint = md5($session_data)) OR $this->_key_exists === FALSE)
 			{
-				$this->_fingerprint = $fingerprint;
-				$this->_key_exists = TRUE;
-				return $this->_success;
+				if ($this->_redis->set($this->_key_prefix.$session_id, $session_data, $this->_config['expiration']))
+				{
+					$this->_fingerprint = $fingerprint;
+					$this->_key_exists = TRUE;
+					return $this->_success;
+				}
+
+				return $this->_failure;
 			}
 
-			return $this->_failure;
-		}
-
-		return ($this->_redis->{$this->_setTimeout_name}($this->_key_prefix.$session_id, $this->_config['expiration']))
-			? $this->_success
-			: $this->_failure;
+			return ($this->_redis->{$this->_setTimeout_name}($this->_key_prefix.$session_id, $this->_config['expiration']))
+				? $this->_success
+				: $this->_failure;
 	}
 
 	// ------------------------------------------------------------------------

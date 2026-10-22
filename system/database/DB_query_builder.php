@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -47,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Drivers
  * @category	Database
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/database/
+ * @link		https://codeigniter.com/user_guide/database/
  */
 
 abstract class CI_DB_query_builder extends CI_DB_driver {
@@ -526,13 +525,14 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	 */
 	public function join($table, $cond, $type = '', $escape = NULL)
 	{
-		if ($type === null) {
-			$type = '';
-		}
+		if ($type === null)
+			{
+				$type = '';
+			}
 
 		if (!is_string($type)) {
 			throw new InvalidArgumentException('join() expects parameter 3 to be a string, ' . gettype($type) . ' given');
-		}
+			}
 
 		$type = trim((string)strtoupper($type).' JOIN');
 		preg_match('#^(NATURAL\s+)?((LEFT|RIGHT|FULL)\s+)?((INNER|OUTER)\s+)?JOIN$#', $type) OR $type = 'JOIN';
@@ -860,18 +860,13 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Internal WHERE/HAVING IN
+	 * Internal WHERE IN
 	 *
 	 * @used-by	where_in()
 	 * @used-by	or_where_in()
 	 * @used-by	where_not_in()
 	 * @used-by	or_where_not_in()
-	 * @used-by	having_in()
-	 * @used-by	or_having_in()
-	 * @used-by	having_not_in()
-	 * @used-by	or_having_not_in()
 	 *
-	 * @param	string	$qb_key	'qb_where' or 'qb_having'
 	 * @param	string	$key	The field to search
 	 * @param	array	$values	The values searched on
 	 * @param	bool	$not	If the statement would be IN or NOT IN
@@ -1200,7 +1195,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	/**
 	 * GROUP BY
 	 *
-	 * @param	mixed	$by
+	 * @param	string	$by
 	 * @param	bool	$escape
 	 * @return	CI_DB_query_builder
 	 */
@@ -1511,7 +1506,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 		}
 		else
 		{
-			$this->qb_orderby       = $qb_orderby;
+			$this->qb_orderby = $qb_orderby;
 			$this->qb_cache_orderby = $qb_cache_orderby;
 		}
 
@@ -1527,7 +1522,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	// --------------------------------------------------------------------
 
 	/**
-	 * get_where()
+	 * Get_Where
 	 *
 	 * Allows the where clause, limit and offset to be added directly
 	 *
@@ -2545,7 +2540,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	 *
 	 * Escapes identifiers in GROUP BY statements at execution time.
 	 *
-	 * Required so that aliases are tracked properly, regardless of whether
+	 * Required so that aliases are tracked properly, regardless of wether
 	 * group_by() is called prior to from(), join() and dbprefix is added
 	 * only if needed.
 	 *
@@ -2581,7 +2576,7 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	 *
 	 * Escapes identifiers in ORDER BY statements at execution time.
 	 *
-	 * Required so that aliases are tracked properly, regardless of whether
+	 * Required so that aliases are tracked properly, regardless of wether
 	 * order_by() is called prior to from(), join() and dbprefix is added
 	 * only if needed.
 	 *
@@ -2595,21 +2590,21 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 		}
 
 		for ($i = 0, $c = count($this->qb_orderby); $i < $c; $i++)
-		{
+			{
 			if (is_string($this->qb_orderby[$i]))
 			{
 				continue;
 			}
 
 			if ($this->qb_orderby[$i]['escape'] !== FALSE && ! $this->_is_literal($this->qb_orderby[$i]['field']))
-			{
-				$this->qb_orderby[$i]['field'] = $this->protect_identifiers($this->qb_orderby[$i]['field']);
+				{
+					$this->qb_orderby[$i]['field'] = $this->protect_identifiers($this->qb_orderby[$i]['field']);
+				}
+
+				$this->qb_orderby[$i] = $this->qb_orderby[$i]['field'].$this->qb_orderby[$i]['direction'];
 			}
 
-			$this->qb_orderby[$i] = $this->qb_orderby[$i]['field'].$this->qb_orderby[$i]['direction'];
-		}
-
-		return "\nORDER BY ".implode(', ', $this->qb_orderby);
+			return "\nORDER BY ".implode(', ', $this->qb_orderby);
 	}
 
 	// --------------------------------------------------------------------

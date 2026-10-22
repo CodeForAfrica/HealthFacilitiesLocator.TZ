@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2019 - 2022, CodeIgniter Foundation
+ * Copyright (c) 2014 - 2016, British Columbia Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
- * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
- * @license	https://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2016, British Columbia Institute of Technology (http://bcit.ca/)
+ * @license	http://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.4.1
  * @filesource
@@ -49,7 +48,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage  Drivers
  * @category	Database
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/database/
+ * @link		https://codeigniter.com/user_guide/database/
  */
 
 /**
@@ -70,9 +69,9 @@ class CI_DB_oci8_driver extends CI_DB {
 	public $dbdriver = 'oci8';
 
 	/**
-	 * Commit mode flag
+	 * Statement ID
 	 *
-	 * @var	int
+	 * @var	resource
 	 */
 	public $commit_mode = OCI_COMMIT_ON_SUCCESS;
 
@@ -86,13 +85,13 @@ class CI_DB_oci8_driver extends CI_DB {
 	 */
 	public $limit_used = FALSE;
 
+	// --------------------------------------------------------------------
+
 	/**
-	 * Error cache
+	 * Reset $stmt_id flag
 	 *
-	 * Cached error info about failed queries.
-	 * Used so that statement IDs can be released immediately.
-	 *
-	 * @var	array|false
+	 * Used by stored_procedure() to prevent _execute() from
+	 * re-setting the statement ID.
 	 */
 	protected $_error = FALSE;
 
@@ -105,8 +104,6 @@ class CI_DB_oci8_driver extends CI_DB {
 	 * @var	int|false
 	 */
 	protected $_affected_rows = FALSE;
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * List of reserved identifiers
@@ -285,8 +282,8 @@ class CI_DB_oci8_driver extends CI_DB {
 		if ($this->is_write_type($sql) OR $result === FALSE)
 		{
 			oci_free_statement($this->result_id);
-			return $result;
-		}
+		return $result;
+	}
 
 		return $this->result_id;
 	}
@@ -467,12 +464,15 @@ class CI_DB_oci8_driver extends CI_DB {
 	 * Error
 	 *
 	 * Returns an array containing code and message of the last
-	 * database error that has occurred.
+	 * database error that has occured.
 	 *
 	 * @return	array
 	 */
 	public function error()
 	{
+		// oci_error() returns an array that already contains
+		// 'code' and 'message' keys, but it can return false
+		// if there was no error ....
 		if ( ! empty($this->_error))
 		{
 			return $this->_error;
