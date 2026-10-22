@@ -29,11 +29,8 @@ guide change log <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide
 Server Requirements
 *******************
 
-PHP version 5.6 or newer is recommended.
-
-It should work on 5.3.7 as well, but we strongly advise you NOT to run
-such old versions of PHP, because of potential security and performance
-issues, as well as missing features.
+Use PHP 8.3.36 or a newer 8.3 security release.
+Install the locked dependencies with ``composer install``.
 
 ************
 Installation
@@ -68,3 +65,8 @@ Acknowledgement
 
 The CodeIgniter team would like to thank EllisLab, all the
 contributors to the CodeIgniter project and you, the CodeIgniter user.
+
+Runtime
+-------
+
+Use PHP 8.3.36 or a newer 8.3 security release. Install the locked dependencies with ``composer install``. The bundled CI3-compatible framework is pocketarc/codeigniter 3.4.5 (commit 795dc3f0411f2101f3b624f71cb19937efd90f37).
