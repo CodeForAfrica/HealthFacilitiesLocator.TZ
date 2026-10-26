@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d6770c4deaff80d6372d8b7781e927c",
+    "content-hash": "ed54335b8c36df62b66a60a58e44137c",
     "packages": [],
     "packages-dev": [
         {
@@ -52,7 +52,7 @@
             "time": "2017-03-27T23:33:27+00:00"
         },
         {
-            "name": "mikey179/vfsStream",
+            "name": "mikey179/vfsstream",
             "version": "v1.1.0",
             "source": {
                 "type": "git",
@@ -88,7 +88,10 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.2.4"
+        "php": "~8.3.36"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "8.3.36"
+    }
 }

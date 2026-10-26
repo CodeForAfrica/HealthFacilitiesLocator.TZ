@@ -1,4 +1,6 @@
 <?php
+// PHP 8 removed each(); use supported iteration while preserving recursive sanitization of the existing array entries. composer.json requires PHP ~8.3.36 and resolves against 8.3.36; composer.lock records that platform and the compatible dependency set. Composer 2 also requires the existing vfsstream package name in lowercase; no package versions change.
+
 /**
  * CodeIgniter
  *
@@ -352,7 +354,8 @@ class CI_Security {
 		// Is the string an array?
 		if (is_array($str))
 		{
-			while (list($key) = each($str))
+			// PHP 8.0 removed each(); preserve this traversal using supported iteration/pointer functions.
+			foreach (array_keys($str) as $key)
 			{
 				$str[$key] = $this->xss_clean($str[$key]);
 			}
